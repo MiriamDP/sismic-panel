@@ -1,6 +1,28 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+@import 'leaflet/dist/leaflet.css';
 @plugin 'daisyui'{
     themes: sunset --default;
+}
+
+*{
+    box-sizing: border-box;
+}
+
+html {
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari y Edge */
+}
+
+body {
+    margin: 0;
+}
+
+.leaflet-popup-content {
+    white-space: pre-line;
 }

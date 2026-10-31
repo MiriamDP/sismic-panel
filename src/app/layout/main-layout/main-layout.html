@@ -1,5 +1,7 @@
-<app-navbar></app-navbar>
-<main class="w-full">
-    <router-outlet></router-outlet>
-</main>
-<app-footer></app-footer>
+<div class="min-h-screen flex flex-col w-full">
+    <app-navbar class="w-full"></app-navbar>
+    <main class="flex-1">
+        <router-outlet></router-outlet>
+    </main>
+    <app-footer class="w-full"></app-footer>
+</div>

@@ -1,12 +1,16 @@
 <div class="navbar bg-base-300 shadow-sm">
-  <div class="flex-1">
-    <div>Earth Watcher</div>
+  <div class="navbar-start">
+    <a class="btn btn-ghost text-xl">Earth Watcher</a>
   </div>
-  <div class="flex-none">
+
+  <div class="navbar-center hidden lg:flex">
     <ul class="menu menu-horizontal px-1">
-      <li><a routerLink="/today" routerLinkActive="link-primary">Today</a></li>
-      <!-- <li><a routerLink="/recipes" routerLinkActive="link-primary">Recetas</a></li> -->
-      <!-- <li><a routerLink="/ingredients" routerLinkActive="link-primary">Ingredientes</a></li> -->
+      <li><a routerLink="/today" routerLinkActive="link-primary">Hoy</a></li>
+      <li><a routerLink="/historic" routerLinkActive="link-primary">Histórico</a></li>
     </ul>
+  </div>
+
+  <div class="navbar-end">
+    <app-status></app-status>
   </div>
 </div>

@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { Map } from '../../components/map/map';
 
 @Component({
   selector: 'app-today-page',
-  imports: [],
+  imports: [Map],
   templateUrl: './today-page.html',
   styleUrl: './today-page.css',
 })
