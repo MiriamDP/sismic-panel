@@ -26,11 +26,6 @@ export class EarthquakeService {
     );
   }
 
-  // Comprobar estado de la API
-  getHealth(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/health`);
-  }
-
   // Consultar estado de importación histórica
   getImportStatus(): Observable<any> {
     return this.http.get(
