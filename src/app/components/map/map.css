@@ -52,3 +52,38 @@ footer p {
 small {
     overflow-wrap: anywhere;
 }
+
+/*Estilos animacion*/
+/* Contenedor de la animación sísmica */
+.seismic-pulse {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #e35b37;
+  background: rgba(227, 91, 55, 0.15);
+  animation: seismic-wave 2.5s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes seismic-wave {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.9;
+  }
+
+  70% {
+    opacity: 0.45;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seismic-pulse {
+    animation: none;
+    opacity: 0;
+  }
+}

@@ -21,3 +21,8 @@ export interface EarthquakeResponse {
   items: Earthquake[];
   pagination: Pagination;
 }
+
+export interface EarthquakeMessage {
+  type: string;
+  items: Earthquake[];
+}
