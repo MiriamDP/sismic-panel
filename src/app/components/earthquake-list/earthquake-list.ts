@@ -4,10 +4,11 @@ import { EarthquakeService } from '../../services/earthquake-service';
 import { DatePipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
+import { Pagination } from '../pagination/pagination';
 
 @Component({
   selector: 'app-earthquake-list',
-  imports: [DatePipe],
+  imports: [DatePipe, Pagination],
   templateUrl: './earthquake-list.html',
   styleUrl: './earthquake-list.css',
 })
@@ -56,6 +57,15 @@ export class EarthquakeList {
     },
   }
   )
+
+  changePage(page:number){
+    const pagination = this.earthquakesResource.value()?.pagination;
+
+    if (pagination?.has_next) {
+      this.page.update(value => page);
+    }
+
+  }
 // Ir a la página siguiente
   nextPage(): void {
     const pagination = this.earthquakesResource.value()?.pagination;

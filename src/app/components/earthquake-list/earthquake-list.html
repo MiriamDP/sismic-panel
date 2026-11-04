@@ -1,44 +1,41 @@
-
-<h2>Terremotos registrados</h2>
+<!-- <h2>Terremotos registrados</h2> -->
 
 @if (earthquakesResource.isLoading()) {
-  <p>Cargando terremotos...</p>
+<p>Cargando terremotos...</p>
 }
 
 @if (earthquakesResource.error()) {
-  <p>Error al cargar los terremotos.</p>
-  <button (click)="reload()">Reintentar</button>
+<p>Error al cargar los terremotos.</p>
+<button class="btn btn-info" (click)="reload()">Reintentar</button>
 }
 
 @if (earthquakesResource.hasValue()) {
 
-  <div>
-    <p>
-      Página {{ earthquakesResource.value().pagination.page }}
-      de {{ earthquakesResource.value().pagination.total_pages }}
-    </p>
+<div>
+  <p>
+    Página {{ earthquakesResource.value().pagination.page }}
+    de {{ earthquakesResource.value().pagination.total_pages }}
+  </p>
 
-    <p>
-      Total de terremotos:
-      {{ earthquakesResource.value().pagination.total_items }}
-    </p>
+  <p>
+    Total de terremotos:
+    {{ earthquakesResource.value().pagination.total_items }}
+  </p>
 
-    <label>
-      Terremotos por página:
+  <label>
+    Terremotos por página:
 
-      <select
-        [value]="pageSize()"
-        (change)="changePageSize(+$any($event.target).value)"
-      >
-        <option value="10">10</option>
-        <option value="20">20</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-      </select>
-    </label>
-  </div>
-
-  <table>
+    <select [value]="pageSize()" (change)="changePageSize(+$any($event.target).value)">
+      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+  </label>
+</div>
+<div class="overflow-x-auto">
+  <table class="table">
+    <!-- head -->
     <thead>
       <tr>
         <th>Magnitud</th>
@@ -48,7 +45,6 @@
         <th>Longitud</th>
       </tr>
     </thead>
-
     <tbody>
       @for (
         earthquake of earthquakesResource.value().items;
@@ -62,28 +58,28 @@
           <td>{{ earthquake.longitude }}</td>
         </tr>
       }
+      
     </tbody>
   </table>
+</div>
 
-  <div class="pagination">
+<app-pagination [currentPage]="earthquakesResource.value().pagination.page"
+  [pages]="earthquakesResource.value().pagination.total_pages" (pageChange)="changePage($event)">
 
-    <button
-      (click)="previousPage()"
-      [disabled]="!earthquakesResource.value().pagination.has_previous"
-    >
-      Anterior
-    </button>
+</app-pagination>
+<div class="pagination">
 
-    <span>
-      {{ page() }} / {{ earthquakesResource.value().pagination.total_pages }}
-    </span>
+  <button (click)="previousPage()" [disabled]="!earthquakesResource.value().pagination.has_previous">
+    Anterior
+  </button>
 
-    <button
-      (click)="nextPage()"
-      [disabled]="!earthquakesResource.value().pagination.has_next"
-    >
-      Siguiente
-    </button>
+  <span>
+    {{ page() }} / {{ earthquakesResource.value().pagination.total_pages }}
+  </span>
 
-  </div>
+  <button (click)="nextPage()" [disabled]="!earthquakesResource.value().pagination.has_next">
+    Siguiente
+  </button>
+
+</div>
 }

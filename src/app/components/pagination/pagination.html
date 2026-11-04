@@ -1,0 +1,7 @@
+    <button class="btn btn-soft btn-info m-2" (click)="goToPage(currentPage()-1)" [disabled]="currentPage()===1"><svg lucideChevronLeft></svg></button>
+    <button class="btn btn-soft btn-secondary m-2" (click)="goToPage(1)">First</button>
+    @for(page of visiblePages(); track page){
+        <button class="btn m-2" [class]="page===currentPage()?'btn-primary':'btn-secondary btn-soft'" (click)="goToPage(page)">{{page}}</button>
+    }
+    <button class="btn btn-soft btn-secondary m-2" (click)="goToPage(pages())">Last</button>
+    <button class="btn btn-soft btn-info m-2" (click)="goToPage(currentPage()+1)" [disabled]="currentPage()===pages()"><svg lucideChevronRight></svg></button>
