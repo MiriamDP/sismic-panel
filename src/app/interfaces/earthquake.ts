@@ -1,3 +1,14 @@
+export interface EarthquakeResponse {
+    event_id: string;
+    magnitude: number;
+    place: string;
+    event_time: string;
+    longitude: number;
+    latitude: number;
+    country_code: string | null;
+    depth_km: number | null;
+}
+
 export interface Earthquake{
     id: string;
     magnitude: number;
@@ -5,6 +16,7 @@ export interface Earthquake{
     event_time: string;
     longitude: number;
     latitude: number;
+    country_code: string|null;
     depth: number | null;
 }
 
@@ -24,5 +36,5 @@ export interface EarthquakeResponse {
 
 export interface EarthquakeMessage {
   type: string;
-  items: Earthquake[];
+  items: EarthquakeResponse[];
 }

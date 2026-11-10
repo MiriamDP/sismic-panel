@@ -7,14 +7,11 @@ import { Earthquake, EarthquakeResponse } from '../interfaces/earthquake';
   providedIn: 'root',
 })
 export class EarthquakeService {
-  private apiUrl='http://localhost:8000'
+  private apiUrl='http://localhost:8000/api'
   private http=inject(HttpClient)
 
   // Obtener terremotos almacenados
-  getEarthquakes(
-    page: number,
-    pageSize: number = 20
-  ): Observable<EarthquakeResponse> {
+  getEarthquakes(page: number, pageSize: number = 20): Observable<EarthquakeResponse> {
 
     const params = new HttpParams()
       .set('page', page)

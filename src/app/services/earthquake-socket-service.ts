@@ -7,13 +7,6 @@ import { EarthquakeMessage } from '../interfaces/earthquake';
   providedIn: 'root',
 })
 export class EarthquakeSocketService {
-  // private socket$ = webSocket<EarthquakeMessage>({
-  //   url: 'ws://localhost:8000/ws/earthquakes'
-  // });
-
-  // connect(): Observable<EarthquakeMessage> {
-  //   return this.socket$.asObservable();
-  // }
 
   private createConnection(): WebSocketSubject<EarthquakeMessage> {
 
@@ -32,36 +25,6 @@ export class EarthquakeSocketService {
     });
   }
 
-  // connect(): Observable<EarthquakeMessage> {
-
-  //   return new Observable(observer => {
-
-  //     let socket: WebSocketSubject<EarthquakeMessage>;
-
-  //     const connect = () => {
-
-  //       socket = this.createConnection();
-
-  //       socket.pipe(
-  //         retry({
-  //           delay: () => timer(5000)
-  //         })
-  //       ).subscribe({
-  //         next: message => observer.next(message),
-  //         error: error => observer.error(error)
-  //       });
-
-  //     };
-
-  //     connect();
-
-  //     return () => {
-  //       socket?.complete();
-  //     };
-
-  //   });
-
-  // }
   connect(url: string): Observable<EarthquakeMessage> {
 
     return defer(() =>

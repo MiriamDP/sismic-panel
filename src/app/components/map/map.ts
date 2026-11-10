@@ -1,10 +1,12 @@
-import { Component, signal, DestroyRef, inject } from '@angular/core';
+import { Component, signal, DestroyRef, inject, effect, output } from '@angular/core';
 import { LeafletDirective } from '@bluehalo/ngx-leaflet';
 import * as L from 'leaflet';
 import type { FeatureCollection, Point } from 'geojson';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Earthquake } from '../../interfaces/earthquake';
 import { EarthquakeSocketService } from '../../services/earthquake-socket-service';
+import { EarthquakeMappers } from '../../mapper/earthquake-mapper';
+import { EarthquakeStoreService } from '../../services/earthquake-store-service';
 
 type Properties = { mag: number | null; place: string; time: number; updated: number; country_name?: string | null };
 type Events = FeatureCollection<Point, Properties> & { metadata?: { generated?: number; mode?: string } };
@@ -19,9 +21,39 @@ type Config = { mode: 'demo' | 'api'; apiUrl: string; refreshMs: number; skipNgr
 export class MapComponent {
   readonly mode = signal('Cargando configuración');
   readonly status = signal('Preparando el mapa…');
-  readonly lastRead = signal('Sin lectura');
+  readonly lastRead = signal<Date|string>('Sin lectura');
+  newEarthquake=output<Earthquake>()
+  lastReadEffect=effect(()=>{
+
+    const value = this.lastRead();
+    
+    if (value instanceof Date || !isNaN(Date.parse(value))) {
+      const dateObj = value instanceof Date ? value : new Date(value);
+
+      const date = dateObj.toISOString().split('T')[0];
+      const hour = dateObj.toISOString().split('T')[1].substring(0, 8);
+      
+      this.lastReadDateEmit.emit(date);
+      this.lastReadHourEmit.emit(hour);
+    } else {
+      this.lastReadDateEmit.emit('Sin fecha');
+      this.lastReadHourEmit.emit('Sin hora');
+    }
+  })
+  lastReadDateEmit=output<string>();
+  lastReadHourEmit=output<string>();
   readonly generated = signal('Sin información');
   readonly count = signal(0);
+  // countEffect=effect(()=>{
+  //   this.countEmit.emit(this.count())
+  // })
+  countEmit = output<number>();
+  // readonly totalEarthquakes =signal(0);
+  totalEarthquakesEmit =output<number>();
+  omittedCount=output<number>();
+  // totalEffect=effect(()=>{
+  //   this.totalEarthquakesEmit.emit(this.count())
+  // })
   readonly omitted = signal(0);
   readonly countriesStatus = signal('Cargando catálogo');
   readonly options: L.MapOptions = { center: L.latLng(18, 0), zoom: 2, minZoom: 2, maxZoom: 8, preferCanvas: true, worldCopyJump: false };
@@ -34,9 +66,19 @@ export class MapComponent {
   private earthquakeWebsocket = inject(EarthquakeSocketService);
   private earthquakeMarkers = new Map<string, L.CircleMarker>();
   private earthquakeData = new Map<string, Earthquake>();
-  private readonly MAX_EARTHQUAKES = 20;
+  private readonly MAX_EARTHQUAKES = 3;
   private animationTimers = new Set<ReturnType<typeof setTimeout>>();
   private pulseMarkers = new Set<L.Marker>();
+  private earthquakeStore=inject(EarthquakeStoreService)
+
+
+  constructor() {
+    effect(()=> {
+      const earthquakes=this.earthquakeStore.earthquakes();
+      if (!this.map) {return;}
+      this.syncEarthquakes(earthquakes);  
+    });
+  }
 
   async onMapReady(map: L.Map): Promise<void> {
     this.map = map;
@@ -56,6 +98,7 @@ export class MapComponent {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }
     ).addTo(map);
+
     const borders = L.geoJSON(undefined, {
       style: { color: '#334155', weight: 1, fill: false },
       onEachFeature: (feature, layer) => {
@@ -64,7 +107,9 @@ export class MapComponent {
         layer.bindTooltip(name);
       }
     }).addTo(map);
+
     this.events.addTo(map);
+
     L.control.layers({ 'OpenStreetMap': base }, { 'Países (Natural Earth)': borders, 'Terremotos': this.events }).addTo(map);
     map.attributionControl.addAttribution('Fronteras: Natural Earth · Datos reales: USGS');
     try {
@@ -82,8 +127,8 @@ export class MapComponent {
         await this.refresh(config);
 
       } else {
+        this.loadStoredEarthquakes();
 
-        this.connectToEarthquakes(config.apiUrl);
 
       }
     } catch { this.status.set('Error: revisa public/config.json'); }
@@ -124,8 +169,10 @@ export class MapComponent {
         L.circleMarker([lat, lon], { radius: magnitude === null ? 4 : Math.max(3, Math.min(18, 3 + (magnitude + 1) * 2)), color, fillColor: color, fillOpacity: .75, weight: 1 }).bindPopup(popup).addTo(next);
         count++;
       }
-      this.events.clearLayers(); this.events.addLayer(next);
-      this.count.set(count); this.omitted.set(omitted);
+      this.events.clearLayers(); 
+      this.events.addLayer(next);
+      this.count.set(count);
+      this.omitted.set(omitted);
       this.lastRead.set(new Date().toISOString());
       this.generated.set(this.date(data.metadata?.generated));
       this.status.set(config.mode === 'demo' ? 'Ejemplo estático: no representa actividad real' : 'API accesible · consulta completada');
@@ -176,97 +223,121 @@ export class MapComponent {
 
   }
 
-  private updateEarthquakeMarkers(earthquakes: Earthquake[]): void {
+  // private updateEarthquakeMarkers(earthquakes: Earthquake[]): void {
 
-    const next = L.layerGroup();
+  //   for (const earthquake of earthquakes) {
 
-    let omitted = 0;
-    let count = 0;
+  //     const {
+  //       id,
+  //       latitude,
+  //       longitude
+  //     } = earthquake;
 
-    // Ordenar del más reciente al más antiguo
-    const latest = [...earthquakes]
-      .sort((a, b) =>
-        new Date(b.event_time).getTime() -
-        new Date(a.event_time).getTime()
-      )
-      .slice(0, 20);
+  //     // Validar el terremoto
+  //     if (
+  //       !id ||
+  //       !Number.isFinite(latitude) ||
+  //       !Number.isFinite(longitude) ||
+  //       Math.abs(latitude) > 90 ||
+  //       Math.abs(longitude) > 180
+  //     ) {
+  //       continue;
+  //     }
 
-    for (const earthquake of latest) {
+  //     // Comprobar si ya existe
+  //     const existingMarker = this.earthquakeMarkers.get(id);
 
-      const {
-        id,
-        magnitude,
-        place,
-        event_time,
-        latitude,
-        longitude,
-        depth
-      } = earthquake;
+  //     if (existingMarker) {
 
-      if (
-        !Number.isFinite(longitude) ||
-        !Number.isFinite(latitude) ||
-        Math.abs(longitude) > 180 ||
-        Math.abs(latitude) > 90
-      ) {
-        omitted++;
-        continue;
-      }
+  //       // Actualizar el marcador sin duplicarlo
+  //       existingMarker.setLatLng([latitude, longitude]);
 
-      const magnitudeOk =
-        typeof magnitude === 'number' &&
-        Number.isFinite(magnitude);
+  //       const magnitude = earthquake.magnitude;
+  //       const magnitudeOk =
+  //         typeof magnitude === 'number' &&
+  //         Number.isFinite(magnitude);
 
-      const depthOk =
-        typeof depth === 'number' &&
-        Number.isFinite(depth);
+  //       const depth = earthquake.depth;
+  //       const depthOk =
+  //         typeof depth === 'number' &&
+  //         Number.isFinite(depth);
 
-      const color = !depthOk
-        ? '#64748b'
-        : depth! < 70
-          ? '#e8a317'
-          : depth! < 300
-            ? '#e35b37'
-            : '#7b3fb6';
+  //       const color = !depthOk
+  //         ? '#64748b'
+  //         : depth! < 70
+  //           ? '#e8a317'
+  //           : depth! < 300
+  //             ? '#e35b37'
+  //             : '#7b3fb6';
 
-      const popup = document.createElement('div');
+  //       existingMarker.setStyle({
+  //         radius: magnitudeOk
+  //           ? Math.max(3, Math.min(18, 3 + (magnitude! + 1) * 2))
+  //           : 4,
+  //         color,
+  //         fillColor: color
+  //       });
 
-      popup.textContent = [
-        place ?? 'Sin descripción',
-        `Magnitud: ${magnitudeOk ? magnitude : 'ND'}`,
-        `Profundidad: ${depthOk ? depth + ' km' : 'ND'}`,
-        `Fecha UTC: ${this.formatEventDate(event_time)}`,
-        `ID: ${id ?? 'ND'}`
-      ].join('\n');
+  //       this.updateMarkerPopup(existingMarker, earthquake);
 
-      L.circleMarker(
-        [latitude, longitude],
-        {
-          radius: magnitudeOk
-            ? Math.max(3, Math.min(18, 3 + (magnitude! + 1) * 2))
-            : 4,
-          color,
-          fillColor: color,
-          fillOpacity: 0.75,
-          weight: 1
-        }
-      )
-        .bindPopup(popup)
-        .addTo(next);
+  //       this.earthquakeData.set(id, earthquake);
 
-      count++;
-    }
+  //       continue;
+  //     }
 
-    // Sustituir la capa anterior por la nueva
-    this.events.clearLayers();
-    this.events.addLayer(next);
+  //     // Si hemos alcanzado el máximo, eliminar el más antiguo
+  //     if (this.earthquakeMarkers.size >= this.MAX_EARTHQUAKES) {
 
-    this.count.set(count);
-    this.omitted.set(omitted);
+  //       const oldestId = this.earthquakeMarkers.keys().next().value;
 
-    this.lastRead.set(new Date().toISOString());
+  //       if (oldestId !== undefined) {
 
-  }
+  //         const oldestMarker = this.earthquakeMarkers.get(oldestId);
+
+  //         if (oldestMarker) {
+  //           this.events.removeLayer(oldestMarker);
+  //         }
+
+  //         this.earthquakeMarkers.delete(oldestId);
+  //         this.earthquakeData.delete(oldestId);
+
+  //       }
+  //     }
+
+  //     // Crear el nuevo marcador
+  //     const marker = this.createEarthquakeMarker(earthquake);
+
+  //     marker.addTo(this.events);
+
+  //     // Insertarlo al final de la cola
+  //     this.earthquakeMarkers.set(id, marker);
+  //     this.earthquakeData.set(id, earthquake);
+
+  //     // Animar únicamente los terremotos nuevos
+  //     const depth = earthquake.depth;
+
+  //     const color = depth == null
+  //       ? '#64748b'
+  //       : depth < 70
+  //         ? '#e8a317'
+  //         : depth < 300
+  //           ? '#e35b37'
+  //           : '#7b3fb6';
+
+  //     this.animateEarthquake(
+  //       latitude,
+  //       longitude,
+  //       color
+  //     );
+
+  //   }
+
+  //   this.count.set(this.earthquakeMarkers.size);
+  //   this.totalEarthquakes.update(v=>v+1);
+
+  //   this.lastRead.set(new Date().toISOString());
+
+  // }
 
   private formatEventDate(value: string | number): string {
 
@@ -278,51 +349,64 @@ export class MapComponent {
 
   }
 
-  private connectToEarthquakes(apiUrl: string): void {
+  // private connectToEarthquakes(apiUrl: string): void {
 
-    const wsUrl = apiUrl
-      .replace(/^http/, 'ws')
-      .replace(/\/$/, '') + '/ws/earthquakes';
+  //   const wsUrl = apiUrl
+  //     .replace(/^http/, 'ws')
+  //     .replace(/\/$/, '') + '/ws/earthquakes';
 
-    this.status.set('Conectando al servidor de terremotos...');
+  //   this.status.set('Conectando al servidor de terremotos...');
 
-    this.earthquakeWebsocket.connect(wsUrl)
-      .pipe(
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe({
+  //   this.earthquakeWebsocket.connect(wsUrl)
+  //     .pipe(
+  //       takeUntilDestroyed(this.destroyRef)
+  //     )
+  //     .subscribe({
 
-        next: message => {
+  //       next: message => {
 
-          if (message.type !== 'earthquakes_update') {
-            return;
-          }
+  //         if (message.type !== 'earthquakes_update') {
+  //           return;
+  //         }
 
-          this.updateEarthquakeMarkers(message.items);
+  //         console.log('DATOS ORIGINALES:', message.items);
 
-          this.status.set(
-            'WebSocket conectado · Actualización en tiempo real'
-          );
+  //       const mapped = EarthquakeMappers.mapEarthquakes(message.items);
 
-          this.generated.set(
-            new Date().toISOString()
-          );
+  //       console.table(mapped.map(e => ({
+  //         id: e.id,
+  //         latitude: e.latitude,
+  //         longitude: e.longitude,
+  //         latType: typeof e.latitude,
+  //         lonType: typeof e.longitude,
+  //         valid: Number.isFinite(e.latitude) &&
+  //               Number.isFinite(e.longitude)
+  //       })));
 
-        },
+  //         // Procesar los terremotos recibidos
+  //         //this.updateEarthquakeMarkers(EarthquakeMappers.mapEarthquakes(message.items));
 
-        error: error => {
+  //         this.status.set(
+  //           'WebSocket conectado · Actualización en tiempo real'
+  //         );
 
-          console.error('Error WebSocket:', error);
+  //         this.generated.set(new Date().toISOString());
 
-          this.status.set(
-            'Error en la conexión WebSocket'
-          );
+  //       },
 
-        }
+  //       error: error => {
 
-      });
+  //         console.error('Error WebSocket:', error);
 
-  }
+  //         this.status.set(
+  //           'Error en la conexión WebSocket'
+  //         );
+
+  //       }
+
+  //     });
+
+  // }
 
   private createEarthquakeMarker(
     earthquake: Earthquake
@@ -394,7 +478,7 @@ export class MapComponent {
     earthquakes: Earthquake[]
   ): void {
 
-    const validEarthquakes = earthquakes
+    const validCoordinates = earthquakes
       .filter(event =>
         !!event.id &&
         Number.isFinite(event.latitude) &&
@@ -402,11 +486,50 @@ export class MapComponent {
         Math.abs(event.latitude) <= 90 &&
         Math.abs(event.longitude) <= 180
       )
-      .sort((a, b) =>
-        new Date(b.event_time).getTime() -
-        new Date(a.event_time).getTime()
-      )
-      .slice(0, this.MAX_EARTHQUAKES);
+      // .sort((a, b) =>
+      //   new Date(b.event_time).getTime() -
+      //   new Date(a.event_time).getTime()
+      // )
+      // .slice(0, this.MAX_EARTHQUAKES);
+
+       // 2. Contabilizar únicamente los eventos inválidos
+  const invalidCoordinates = earthquakes.length - validCoordinates.length;
+
+  // 3. Ordenar cronológicamente
+  const sortedEarthquakes = [...validCoordinates].sort((a, b) =>
+    new Date(b.event_time).getTime() -
+    new Date(a.event_time).getTime()
+  );
+
+  // 4. Seleccionar los tres más recientes
+  const validEarthquakes = sortedEarthquakes.slice(
+    0,
+    this.MAX_EARTHQUAKES
+  );
+
+  // 5. Contabilizar los excluidos por el límite
+  const excludedByLimit = Math.max(
+    0,
+    sortedEarthquakes.length - this.MAX_EARTHQUAKES
+  );
+
+    console.log('Total recibidos:', earthquakes.length);
+    console.log('Coordenadas válidas:', validCoordinates.length);
+    console.log('Coordenadas inválidas:', invalidCoordinates);
+    console.log('Excluidos por límite:', excludedByLimit);
+    console.log('Terremotos que se pintarán:', validEarthquakes.length);
+
+    const uniqueEarthquakes = Array.from(
+      new Map(earthquakes.map(e => [e.id, e])).values()
+    );
+    this.totalEarthquakesEmit.emit(uniqueEarthquakes.length); //deben ser unicos
+    this.countEmit.emit(validEarthquakes.length);
+    this.omittedCount.emit(invalidCoordinates);
+
+
+//       console.log('Total recibidos:', earthquakes.length);
+//       console.log('Total válidos:', validEarthquakes.length);
+// console.log('Total descartados:', earthquakes.length - validEarthquakes.length);
 
     // IDs que deben permanecer en el mapa
     const currentIds = new Set(
@@ -475,6 +598,10 @@ export class MapComponent {
           color
         );
 
+        //Emitr terremoto mas reciente
+        this.newEarthquake.emit(earthquakes[0])
+
+
       } else {
 
         // Actualizar marcador existente sin recrearlo
@@ -523,7 +650,7 @@ export class MapComponent {
     }
 
     this.count.set(this.earthquakeMarkers.size);
-    this.omitted.set(omitted);
+    this.omitted.set(invalidCoordinates);
 
     this.lastRead.set(new Date().toISOString());
 
@@ -567,5 +694,10 @@ export class MapComponent {
 
     this.animationTimers.add(timer);
 
+  }
+
+  private loadStoredEarthquakes():void {
+    const earthquakes=this.earthquakeStore.getAll();
+    this.syncEarthquakes(earthquakes);
   }
 }
