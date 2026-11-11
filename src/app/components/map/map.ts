@@ -7,6 +7,7 @@ import { Earthquake } from '../../interfaces/earthquake';
 import { EarthquakeSocketService } from '../../services/earthquake-socket-service';
 import { EarthquakeMappers } from '../../mapper/earthquake-mapper';
 import { EarthquakeStoreService } from '../../services/earthquake-store-service';
+import { environment } from '../../../environments/environment';
 
 type Properties = { mag: number | null; place: string; time: number; updated: number; country_name?: string | null };
 type Events = FeatureCollection<Point, Properties> & { metadata?: { generated?: number; mode?: string } };
@@ -66,7 +67,7 @@ export class MapComponent {
   private earthquakeWebsocket = inject(EarthquakeSocketService);
   private earthquakeMarkers = new Map<string, L.CircleMarker>();
   private earthquakeData = new Map<string, Earthquake>();
-  private readonly MAX_EARTHQUAKES = 3;
+  private readonly MAX_EARTHQUAKES = environment.MAX_EARTHQUAKES;
   private animationTimers = new Set<ReturnType<typeof setTimeout>>();
   private pulseMarkers = new Set<L.Marker>();
   private earthquakeStore = inject(EarthquakeStoreService)

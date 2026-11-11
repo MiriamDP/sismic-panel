@@ -1,0 +1,6 @@
+<h1>Importaciones historicas realizadas</h1>
+<div class="flex gap-4">
+    <app-import-list [imports]="importJobs()"></app-import-list>
+    <app-import-form (formValue)="createImport($event)"></app-import-form>
+    <app-import-status></app-import-status>
+</div>

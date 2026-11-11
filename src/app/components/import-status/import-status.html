@@ -1,0 +1,122 @@
+
+<div class="card bg-base-100 shadow">
+
+  <div class="card-body">
+
+    <h2 class="card-title">
+      Estado de la última importación
+    </h2>
+
+    @if (loading()) {
+      <span class="loading loading-spinner"></span>
+      <p>Consultando importaciones...</p>
+    }
+
+    @else if (error()) {
+      <p class="text-error">
+        No se pudo consultar el estado de la importación.
+      </p>
+    }
+
+    @else if (!job()) {
+      <p class="text-base-content/60">
+        Todavía no hay importaciones registradas.
+      </p>
+    }
+
+    @else {
+
+      <div class="flex flex-col gap-3">
+
+        <div>
+          <span class="text-sm opacity-60">ID de importación</span>
+          <p class="font-semibold">{{ job().id }}</p>
+        </div>
+
+        <div>
+          <span class="text-sm opacity-60">Estado</span>
+
+          <div>
+            @switch (job().status) {
+
+              @case ('running') {
+                <span class="badge badge-info">En ejecución</span>
+              }
+
+              @case ('completed') {
+                <span class="badge badge-success">Completada</span>
+              }
+
+              @case ('failed') {
+                <span class="badge badge-error">Fallida</span>
+              }
+
+              @case ('interrupted') {
+                <span class="badge badge-warning">Interrumpida</span>
+              }
+
+              @default {
+                <span class="badge">{{ job().status }}</span>
+              }
+
+            }
+          </div>
+        </div>
+
+        <div>
+          <span class="text-sm opacity-60">Periodo importado</span>
+          <p>
+            {{ job().start_date | date:'dd/MM/yyyy' }}
+            -
+            {{ job().end_date | date:'dd/MM/yyyy' }}
+          </p>
+        </div>
+
+        <div>
+          <span class="text-sm opacity-60">Eventos publicados</span>
+          <p class="text-2xl font-bold">
+            {{ job().events_published }}
+          </p>
+        </div>
+
+        <div>
+          <span class="text-sm opacity-60">Intervalos completados</span>
+          <p>{{ job().intervals_completed }}</p>
+        </div>
+
+        @if (job().current_interval_start) {
+          <div>
+            <span class="text-sm opacity-60">
+              Intervalo actual
+            </span>
+
+            <p>
+              {{ job().current_interval_start | date:'dd/MM/yyyy' }}
+              -
+              {{ job().current_interval_end | date:'dd/MM/yyyy' }}
+            </p>
+          </div>
+        }
+
+        @if (job().error) {
+          <div class="alert alert-error">
+            {{ job().error }}
+          </div>
+        }
+
+        @if (job().finished_at) {
+          <div>
+            <span class="text-sm opacity-60">Finalizada</span>
+            <p>{{ job().finished_at | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+          </div>
+        }
+
+      </div>
+    }
+
+    <div class="text-xs opacity-50">
+      Actualización automática cada 10 segundos.
+    </div>
+
+  </div>
+</div>
