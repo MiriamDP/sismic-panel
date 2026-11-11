@@ -11,10 +11,7 @@
   </thead>
   <tbody>
     @for (earthquake of earthquakes();track earthquake.id) {
-    <tr [routerLink]="['/historic',earthquake.id]" [state]="{
-    page: currentPage(),
-    pageSize: pageSize()
-  }" class="cursor-pointer  hover:bg-base-200">
+    <tr [routerLink]="['/historic',earthquake.id]" [queryParams]="queryParams()" class="cursor-pointer  hover:bg-base-200">
       <td>{{ earthquake.magnitude }}</td>
       <td>{{ earthquake.place }}</td>
       <td>{{ earthquake.event_time | date:'short' }}</td>

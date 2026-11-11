@@ -1,6 +1,72 @@
-<h1>Importaciones historicas realizadas</h1>
-<div class="flex gap-4">
-    <app-import-list [imports]="importJobs()"></app-import-list>
-    <app-import-form (formValue)="createImport($event)"></app-import-form>
-    <app-import-status></app-import-status>
+
+<div class="container mx-auto p-4 lg:p-6">
+
+  <!-- Cabecera -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-secondary">
+      Gestión de importaciones
+    </h1>
+    <p class="text-sm text-base-content/60 mt-1">
+      Consulta, crea y supervisa tus procesos de importación.
+    </p>
+  </div>
+
+  <!-- Distribución principal -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+    <!-- Lista de importaciones -->
+    <section class="xl:col-span-2 min-w-0">
+      <div class="card bg-base-100 shadow-md border border-base-300">
+
+        <div class="card-body p-4 sm:p-6">
+
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold text-accent">
+              Importaciones
+            </h2>
+          </div>
+
+          <app-import-list
+            [imports]="importJobs()">
+          </app-import-list>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel lateral -->
+    <aside class="flex flex-col gap-6">
+
+      <!-- Formulario -->
+      <section class="card bg-base-100 shadow-md border border-base-300">
+        <div class="card-body p-4 sm:p-6">
+
+          <h2 class="text-lg font-bold mb-2 text-accent">
+            Nueva importación
+          </h2>
+
+          <app-import-form
+            (formValue)="createImport($event)">
+          </app-import-form>
+
+        </div>
+      </section>
+
+      <!-- Estado -->
+      <section class="card bg-base-100 shadow-md border border-base-300">
+        <div class="card-body p-4 sm:p-6">
+
+          <h2 class="text-lg font-bold mb-2 text-accent">
+            Estado del sistema
+          </h2>
+
+          <app-import-status></app-import-status>
+
+        </div>
+      </section>
+
+    </aside>
+
+  </div>
+
 </div>

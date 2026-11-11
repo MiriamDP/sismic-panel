@@ -45,3 +45,19 @@ export interface EarthquakeMessage {
   type: string;
   items: EarthquakeResponse[];
 }
+
+export interface EarthquakeFilters {
+  page: number;
+  pageSize: number;
+
+  countryCode: string | null;
+
+  startDate: string | null;
+  endDate: string | null;
+
+  minMagnitude: number | null;
+  maxMagnitude: number | null;
+
+  minDepth: number | null;
+  maxDepth: number | null;
+}
