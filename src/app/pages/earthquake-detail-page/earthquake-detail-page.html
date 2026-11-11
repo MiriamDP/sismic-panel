@@ -1,0 +1,25 @@
+<button class="btn btn-outline btn-secondary" (click)="goBack()">
+    <svg lucideArrowLeft></svg>
+  Volver
+</button>
+@if (earthquake.isLoading()) {
+    <p>Buscando terremoto...</p>
+}
+@if (earthquake.hasValue()) {
+<div class="flex gap-4 w-full min-w-0 overflow-hidden">
+
+        <div class="w-[35%] min-w-0 shrink-0">
+
+<div class="stats stats-vertical shadow w-full min-w-0">
+                <app-stat title="País" [value]="earthquake.value().country_name ?? 'Sin pais asignado'" [icon]="icons.flag"></app-stat>
+                <app-stat title="Magnitud" [value]="earthquake.value().magnitude | number:'1.2-2'" [icon]="icons.activity "></app-stat>
+                <app-stat title="Profundidad" [value]="earthquake.value().depth | number:'1.2-2'" subtitle="Km" [icon]="icons.depth"></app-stat>
+                <app-stat title="Hora del evento" [value]="earthquake.value().event_time | date:'HH:mm:ss'" [icon]="icons.clock"></app-stat>
+                <app-stat title="Dia del evento" [value]="earthquake.value().event_time | date:'dd/MM/yyyy'" [icon]="icons.calendar"></app-stat>
+            </div>
+        </div>
+        <div class="flex-1 min-w-0">
+            <app-simple-map [earthquake]="earthquake.value()"></app-simple-map>
+        </div>
+    </div>
+}

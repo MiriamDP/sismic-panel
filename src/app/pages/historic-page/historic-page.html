@@ -1,1 +1,44 @@
-<app-earthquake-list></app-earthquake-list>
+
+
+@if (earthquakesResource.isLoading()) {
+<p>Cargando terremotos <span class="loading loading-spinner text-primary"></span></p>
+}
+
+@if (earthquakesResource.error()) {
+<p>Error al cargar los terremotos.</p>
+<button class="btn btn-info" (click)="reload()">Reintentar</button>
+}
+
+@if (earthquakesResource.hasValue()) {
+
+    <div>
+    <p>
+        Página {{ earthquakesResource.value().pagination.page }}
+        de {{ earthquakesResource.value().pagination.total_pages }}
+    </p>
+
+    <p>
+        Total de terremotos:
+        {{ earthquakesResource.value().pagination.total_items }}
+    </p>
+
+    <label>
+        Terremotos por página:
+
+        <select [value]="pageSize()" (change)="changePageSize(+$any($event.target).value)">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        </select>
+    </label>
+    </div>
+    <div class="overflow-x-auto">
+        <app-earthquake-list [earthquakes]="earthquakesResource.value().items"></app-earthquake-list>
+    </div>
+    <div class="flex justify-center">
+        <app-pagination [currentPage]="earthquakesResource.value().pagination.page"
+          [pages]="earthquakesResource.value().pagination.total_pages" (pageChange)="changePage($event)">
+        </app-pagination>
+    </div>
+}

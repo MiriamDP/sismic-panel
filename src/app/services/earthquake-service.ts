@@ -1,32 +1,39 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, httpResource } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Earthquake, EarthquakeResponse } from '../interfaces/earthquake';
+import { map, Observable, tap } from 'rxjs';
+import { Earthquake, EarthquakeResponse, Earthquakes, EarthquakesResponse } from '../interfaces/earthquake';
+import { EarthquakeMappers } from '../mapper/earthquake-mapper';
 
 @Injectable({
   providedIn: 'root',
 })
 export class EarthquakeService {
-  private apiUrl='http://localhost:8000/api'
+  private apiUrl='http://localhost:8000/api/earthquakes'
   private http=inject(HttpClient)
 
   // Obtener terremotos almacenados
-  getEarthquakes(page: number, pageSize: number = 20): Observable<EarthquakeResponse> {
+  getEarthquakes(page: number, pageSize: number = 20): Observable<Earthquakes> {
 
     const params = new HttpParams()
       .set('page', page)
       .set('page_size', pageSize);
 
-    return this.http.get<EarthquakeResponse>(
-      `${this.apiUrl}/earthquakes`,
+    return this.http.get<EarthquakesResponse>(
+      `${this.apiUrl}`,
       { params }
+    ).pipe(
+      map(response => ({...response, items: EarthquakeMappers.mapEarthquakes(response.items)}))
     );
   }
 
   // Consultar estado de importación histórica
-  getImportStatus(): Observable<any> {
-    return this.http.get(
-      `${this.apiUrl}/earthquakes/import-history/status`
+  getEarthquake(id: string) {
+    return httpResource(
+      () => `${this.apiUrl}/${id}`,
+      {
+        parse: (response) =>
+          EarthquakeMappers.mapEarthquake(response as EarthquakeResponse)
+      }
     );
   }
 
@@ -38,7 +45,7 @@ export class EarthquakeService {
   ): Observable<any> {
 
     return this.http.post(
-      `${this.apiUrl}/earthquakes/import-history`,
+      `${this.apiUrl}/import-history`,
       {
         start_date: startDate,
         end_date: endDate,
@@ -46,5 +53,14 @@ export class EarthquakeService {
       }
     );
   }
+
+  getLatest(limit:number=3){
+    return this.http.get<EarthquakeResponse[]>(`${this.apiUrl}/latest?limit=${limit}`).pipe(
+      tap(resp=>console.log('Respuesta recibida',resp)),
+      map(response=>EarthquakeMappers.mapEarthquakes(response))
+    )
+  }
+
+
 }
 

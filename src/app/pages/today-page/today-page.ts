@@ -3,10 +3,11 @@ import { MapComponent } from '../../components/map/map';
 import { Stat } from '../../components/stat/stat';
 import { STAT_ICONS } from '../../utils/stats-icons';
 import { Earthquake } from '../../interfaces/earthquake';
+import { SessionList } from '../../components/session-list/session-list';
 
 @Component({
   selector: 'app-today-page',
-  imports: [MapComponent, Stat],
+  imports: [MapComponent, Stat, SessionList],
   templateUrl: './today-page.html',
   styleUrl: './today-page.css',
 })

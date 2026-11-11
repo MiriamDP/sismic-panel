@@ -6,6 +6,7 @@ export interface EarthquakeResponse {
     longitude: number;
     latitude: number;
     country_code: string | null;
+    country_name: string | null;
     depth_km: number | null;
 }
 
@@ -17,6 +18,8 @@ export interface Earthquake{
     longitude: number;
     latitude: number;
     country_code: string|null;
+    country_name: string | null;
+
     depth: number | null;
 }
 
@@ -29,7 +32,11 @@ export interface Pagination {
   has_previous: boolean;
 }
 
-export interface EarthquakeResponse {
+export interface EarthquakesResponse {
+  items: EarthquakeResponse[];
+  pagination: Pagination;
+}
+export interface Earthquakes {
   items: Earthquake[];
   pagination: Pagination;
 }

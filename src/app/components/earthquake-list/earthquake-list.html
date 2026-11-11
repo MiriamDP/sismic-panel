@@ -1,85 +1,34 @@
-<!-- <h2>Terremotos registrados</h2> -->
-
-@if (earthquakesResource.isLoading()) {
-<p>Cargando terremotos...</p>
-}
-
-@if (earthquakesResource.error()) {
-<p>Error al cargar los terremotos.</p>
-<button class="btn btn-info" (click)="reload()">Reintentar</button>
-}
-
-@if (earthquakesResource.hasValue()) {
-
-<div>
-  <p>
-    Página {{ earthquakesResource.value().pagination.page }}
-    de {{ earthquakesResource.value().pagination.total_pages }}
-  </p>
-
-  <p>
-    Total de terremotos:
-    {{ earthquakesResource.value().pagination.total_items }}
-  </p>
-
-  <label>
-    Terremotos por página:
-
-    <select [value]="pageSize()" (change)="changePageSize(+$any($event.target).value)">
-      <option value="10">10</option>
-      <option value="20">20</option>
-      <option value="50">50</option>
-      <option value="100">100</option>
-    </select>
-  </label>
-</div>
-<div class="overflow-x-auto">
-  <table class="table">
-    <!-- head -->
-    <thead>
-      <tr>
-        <th>Magnitud</th>
-        <th>Lugar</th>
-        <th>Fecha</th>
-        <th>Latitud</th>
-        <th>Longitud</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (
-        earthquake of earthquakesResource.value().items;
-        track earthquake.id
-      ) {
-        <tr>
-          <td>{{ earthquake.magnitude }}</td>
-          <td>{{ earthquake.place }}</td>
-          <td>{{ earthquake.event_time | date:'short' }}</td>
-          <td>{{ earthquake.latitude }}</td>
-          <td>{{ earthquake.longitude }}</td>
-        </tr>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Magnitud</th>
+      <th>Lugar</th>
+      <th>Fecha</th>
+      <th>Latitud</th>
+      <th>Longitud</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (earthquake of earthquakes();track earthquake.id) {
+    <tr [routerLink]="['/historic',earthquake.id]" [state]="{
+    page: currentPage(),
+    pageSize: pageSize()
+  }" class="cursor-pointer  hover:bg-base-200">
+      <td>{{ earthquake.magnitude }}</td>
+      <td>{{ earthquake.place }}</td>
+      <td>{{ earthquake.event_time | date:'short' }}</td>
+      <td>{{ earthquake.latitude }}</td>
+      <td>{{ earthquake.longitude }}</td>
+      @if (isToday(earthquake.event_time)) {
+        <td>
+          <div class="badge badge-accent">Nuevo</div>
+        </td>
+      } @else {
+        <td></td>
       }
-      
-    </tbody>
-  </table>
-</div>
+    </tr>
+    }
 
-<app-pagination [currentPage]="earthquakesResource.value().pagination.page"
-  [pages]="earthquakesResource.value().pagination.total_pages" (pageChange)="changePage($event)">
-
-</app-pagination>
-<div class="pagination">
-
-  <button (click)="previousPage()" [disabled]="!earthquakesResource.value().pagination.has_previous">
-    Anterior
-  </button>
-
-  <span>
-    {{ page() }} / {{ earthquakesResource.value().pagination.total_pages }}
-  </span>
-
-  <button (click)="nextPage()" [disabled]="!earthquakesResource.value().pagination.has_next">
-    Siguiente
-  </button>
-
-</div>
-}
+  </tbody>
+</table>
