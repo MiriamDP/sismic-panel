@@ -1,3 +1,3 @@
 export const environment = {
-    MAX_EARTHQUAKES:3
+    MAX_EARTHQUAKES:5
 };

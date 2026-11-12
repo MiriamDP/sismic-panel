@@ -1,0 +1,20 @@
+<div class="card bg-base-100 shadow-md">
+
+  <div class="card-body">
+
+    <h2 class="card-title text-lg">
+      <i class="fa-solid fa-chart-line text-success"></i>
+      Evolución temporal de terremotos
+    </h2>
+
+    <p class="text-sm opacity-60">
+      Evolución del número de terremotos registrados en el periodo.
+    </p>
+
+    <app-base-chart
+      [config]="chartConfig()">
+    </app-base-chart>
+
+  </div>
+
+</div>

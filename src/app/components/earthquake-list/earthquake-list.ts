@@ -1,15 +1,13 @@
-import { Component, computed, effect, inject, input, linkedSignal, signal } from '@angular/core';
-import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { EarthquakeService } from '../../services/earthquake-service';
-import { DatePipe, JsonPipe } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Component, computed,  inject, input } from '@angular/core';
+import {  toSignal } from '@angular/core/rxjs-interop';
+import { DatePipe } from '@angular/common';
+import { ActivatedRoute,  RouterLink } from '@angular/router';
 import { map } from 'rxjs';
-import { Pagination } from '../pagination/pagination';
 import { Earthquake } from '../../interfaces/earthquake';
 
 @Component({
   selector: 'app-earthquake-list',
-  imports: [DatePipe, Pagination, RouterLink, JsonPipe],
+  imports: [DatePipe,  RouterLink],
   templateUrl: './earthquake-list.html',
   styleUrl: './earthquake-list.css',
 })

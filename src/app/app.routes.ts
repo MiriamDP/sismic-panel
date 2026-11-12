@@ -5,6 +5,7 @@ import { HistoricPage } from './pages/historic-page/historic-page';
 import { MetricsPage } from './pages/metrics-page/metrics-page';
 import { EarthquakeDetailPage } from './pages/earthquake-detail-page/earthquake-detail-page';
 import { ImportPage } from './pages/import-page/import-page';
+import { ComparationPage } from './pages/comparation-page/comparation-page';
 
 export const routes: Routes = [
     {path: '',component: MainLayout, children:[
@@ -13,6 +14,7 @@ export const routes: Routes = [
         {path: 'historic', component: HistoricPage},
         {path: 'historic/:id', component: EarthquakeDetailPage},
         {path: 'metrics', component: MetricsPage},
+        {path: 'comparations', component: ComparationPage},
         {path: 'imports', component: ImportPage},
         // {path: 'recipes', component: RecipesPage},
         // {path: 'recipes/new', component: NewRecipePage},

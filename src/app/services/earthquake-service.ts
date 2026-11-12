@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams, httpResource } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable, tap } from 'rxjs';
-import { Earthquake, EarthquakeFilters, EarthquakeResponse, Earthquakes, EarthquakesResponse } from '../interfaces/earthquake';
+import { Earthquake, EarthquakeFilters, EarthquakeMetrics, EarthquakeMetricsResponse, EarthquakeResponse, Earthquakes, EarthquakesResponse } from '../interfaces/earthquake';
 import { EarthquakeMappers } from '../mapper/earthquake-mapper';
 import { ImportJob } from '../interfaces/import-job';
 import { environment } from '../../environments/environment';
@@ -101,6 +101,72 @@ export class EarthquakeService {
       tap(resp => console.log('Respuesta recibida', resp)),
       map(response => EarthquakeMappers.mapEarthquakes(response))
     )
+  }
+
+  getEarthquakeMetrics(
+    filters: Partial<EarthquakeFilters>
+  ): Observable<EarthquakeMetrics> {
+
+    let params = new HttpParams();
+
+    const parameterMap: Record<string, string> = {
+      countryCode: 'country_code',
+      startDate: 'start_date',
+      endDate: 'end_date',
+      minMagnitude: 'min_magnitude',
+      maxMagnitude: 'max_magnitude',
+      minDepth: 'min_depth',
+      maxDepth: 'max_depth'
+    };
+
+    Object.entries(filters).forEach(([key, value]) => {
+
+      if (value !== null && value !== undefined) {
+
+        const apiKey = parameterMap[key] ?? key;
+
+        params = params.set(apiKey, String(value));
+
+      }
+
+    });
+
+    console.log('Filtros: ',filters)
+
+    return this.http.get<EarthquakeMetricsResponse>(
+      `${this.apiUrl}/metrics`,
+      { params }
+    ).pipe(
+
+      map(response => ({
+
+        ...response,
+
+        summary: {
+          ...response.summary,
+
+          max_earthquake: response.summary.max_earthquake
+            ? EarthquakeMappers.mapEarthquake(
+              response.summary.max_earthquake
+            )
+            : null
+        },
+
+        top_countries: response.top_countries.map(country => ({
+
+          ...country,
+
+          max_earthquake: country.max_earthquake
+            ? EarthquakeMappers.mapEarthquake(
+              country.max_earthquake
+            )
+            : null
+
+        }))
+
+      }))
+
+    );;
   }
 
 

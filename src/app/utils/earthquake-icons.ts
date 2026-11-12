@@ -1,4 +1,4 @@
-import { LucideActivity, LucideArrowDownLeftSquare, LucideArrowDownToLine, LucideCalendar, LucideClock, LucideFlag, LucideGlobe, LucideMapPinned, LucideMoveHorizontal, LucideMoveVertical, LucideOctagonX, LucideSigma, LucideTrendingUp } from "@lucide/angular";
+import { LucideActivity, LucideArrowDownLeftSquare, LucideArrowDownToLine, LucideCalendar, LucideChartNoAxesCombined, LucideClock, LucideFlag, LucideGlobe, LucideMapPinned, LucideMoveHorizontal, LucideMoveVertical, LucideOctagonX, LucideSigma, LucideTrendingUp } from "@lucide/angular";
 
 export const EARTHQUAKE_ICONS = {
   "clock": LucideClock,
@@ -9,5 +9,6 @@ export const EARTHQUAKE_ICONS = {
   "horizontal": LucideMoveHorizontal,
   "activity": LucideActivity,
   "depth": LucideArrowDownToLine,
+  "average": LucideChartNoAxesCombined
 
 };

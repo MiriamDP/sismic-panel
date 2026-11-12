@@ -52,12 +52,110 @@ export interface EarthquakeFilters {
 
   countryCode: string | null;
 
-  startDate: string | null;
-  endDate: string | null;
+  startDate: string | null ;
+  endDate: string | null ;
 
   minMagnitude: number | null;
   maxMagnitude: number | null;
 
   minDepth: number | null;
   maxDepth: number | null;
+}
+
+// export interface EarthquakeMetrics {
+//   summary: {
+//     total_earthquakes: number;
+//     average_magnitude: number | null;
+//     average_depth: number | null;
+//     average_per_day: number | null;
+//     average_per_hour: number | null;
+//     max_earthquake: Earthquake | null;
+//   };
+
+//   top_countries: {
+//     country_code: string | null;
+//     country_name: string;
+//     total_earthquakes: number;
+//     average_magnitude: number | null;
+//     max_earthquake: Earthquake | null;
+//   }[];
+
+//   time_distribution: {
+//     granularity: 'hour' | 'day' | 'month';
+//     data: {
+//       date: string;
+//       count: number;
+//     }[];
+//   };
+
+//   magnitude_depth: {
+//     magnitude: number;
+//     depth: number;
+//   }[];
+// }
+
+export interface EarthquakeMetrics {
+  summary: {
+    total_earthquakes: number;
+    average_magnitude: number | null;
+    average_depth: number | null;
+    average_per_day: number | null;
+    average_per_hour: number | null;
+    max_earthquake: Earthquake | null;
+  };
+
+  top_countries: CountryMetric[];
+
+  time_distribution: {
+    granularity: 'hour' | 'day' | 'month';
+    data: {
+      date: string;
+      count: number;
+    }[];
+  };
+
+  magnitude_depth: {
+    magnitude: number;
+    depth: number;
+  }[];
+}
+
+export interface CountryMetric {
+  country_code: string | null;
+  country_name: string;
+  total_earthquakes: number;
+  average_magnitude: number | null;
+  max_earthquake: Earthquake | null;
+}
+
+export interface EarthquakeMetricsResponse {
+  summary: {
+    total_earthquakes: number;
+    average_magnitude: number | null;
+    average_depth: number | null;
+    average_per_day: number | null;
+    average_per_hour: number | null;
+    max_earthquake: EarthquakeResponse | null;
+  };
+
+  top_countries: {
+    country_code: string | null;
+    country_name: string;
+    total_earthquakes: number;
+    average_magnitude: number | null;
+    max_earthquake: EarthquakeResponse | null;
+  }[];
+
+  time_distribution: {
+    granularity: 'hour' | 'day' | 'month';
+    data: {
+      date: string;
+      count: number;
+    }[];
+  };
+
+  magnitude_depth: {
+    magnitude: number;
+    depth: number;
+  }[];
 }

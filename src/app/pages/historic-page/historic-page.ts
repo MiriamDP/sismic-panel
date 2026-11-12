@@ -10,12 +10,12 @@ import { LucideSlidersHorizontal } from '@lucide/angular';
 
 @Component({
   selector: 'app-historic-page',
-  imports: [EarthquakeList, Pagination,LucideSlidersHorizontal],
+  imports: [EarthquakeList, Pagination, LucideSlidersHorizontal],
   templateUrl: './historic-page.html',
   styleUrl: './historic-page.css',
 })
 export class HistoricPage {
- private earthquakeSvc = inject(EarthquakeService);
+  private earthquakeSvc = inject(EarthquakeService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
 
@@ -56,13 +56,16 @@ export class HistoricPage {
       }
     }
   );
-
+  // Filtros que modifica el usuario
   filters = signal<EarthquakeFilters>(this.queryParams());
+
+  // Filtros que ejecutan la petición HTTP
+  appliedFilters = signal<EarthquakeFilters>(this.queryParams());
 
   // Sincronizar filtros con la URL
   navigateEffect = effect(() => {
 
-    const filters = this.filters();
+    const filters = this.appliedFilters();
 
     this.router.navigate([], {
       relativeTo: this.activatedRoute,
@@ -87,7 +90,7 @@ export class HistoricPage {
 
   earthquakesResource = rxResource({
 
-    params: () => this.filters(),
+    params: () => this.appliedFilters(),
 
     stream: ({ params }) => {
 
@@ -146,6 +149,15 @@ export class HistoricPage {
       minDepth: null,
       maxDepth: null
     }));
+
+  }
+
+  applyFilters(): void {
+
+    this.appliedFilters.set({
+      ...this.filters(),
+      page: 1
+    });
 
   }
 

@@ -1,0 +1,96 @@
+<div class="card bg-base-100 shadow-md">
+
+  <div class="card-body">
+
+    <h2 class="card-title text-lg mb-2">
+      <i class="fa-solid fa-ranking-star text-warning"></i>
+      Top 3 países con más terremotos
+    </h2>
+
+    @if (countries().length > 0) {
+
+      <div class="space-y-4">
+
+        @for (country of countries(); track country.country_code ?? country.country_name; let i = $index) {
+
+          <div class="border border-base-300 rounded-xl p-4">
+
+            <div class="flex justify-between items-center gap-3 mb-3">
+
+              <div class="flex items-center gap-3">
+
+                <span class="badge badge-secondary badge-lg">
+                  {{ i + 1 }}
+                </span>
+
+                <h3 class="font-bold text-lg" >
+                  {{ country.country_name }}
+                </h3>
+
+              </div>
+
+              <span class="font-bold text-secondary">
+                {{ country.total_earthquakes | number }}
+              </span>
+
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+
+              <div>
+                <span class="text-xs opacity-60">
+                  Magnitud media
+                </span>
+
+                <p class="font-semibold">
+                  {{ country.average_magnitude ?? '—' }}
+                </p>
+              </div>
+
+              <div>
+                <span class="text-xs opacity-60">
+                  Mayor magnitud
+                </span>
+
+                <p class="font-semibold text-warning">
+                  {{ country.max_earthquake?.magnitude ?? '—' }}
+                </p>
+              </div>
+
+            </div>
+
+            @if (country.max_earthquake; as event) {
+
+              <div class="divider my-2"></div>
+
+              <p class="text-xs opacity-60 mb-1">
+                Terremoto más importante
+              </p>
+
+              <p class="text-sm font-medium link link-info" [routerLink]="['/historic',event.id]">
+                {{ event.place || 'Localización desconocida' }}
+              </p>
+
+              <p class="text-xs opacity-60">
+                {{ event.event_time | date:'dd/MM/yyyy HH:mm':'UTC' }}
+              </p>
+
+            }
+
+          </div>
+
+        }
+
+      </div>
+
+    } @else {
+
+      <p class="text-center opacity-60 py-6">
+        No hay países con terremotos registrados.
+      </p>
+
+    }
+
+  </div>
+
+</div>

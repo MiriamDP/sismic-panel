@@ -1,11 +1,7 @@
 
 <div class="card bg-base-100 shadow">
 
-  <div class="card-body">
-
-    <h2 class="card-title">
-      Estado de la última importación
-    </h2>
+    <cite>Este estado no indica que los datos esten ya disponibles para consulta. Solo que se han enviado a su procesamiento</cite>
 
     @if (loading()) {
       <span class="loading loading-spinner"></span>
@@ -28,10 +24,7 @@
 
       <div class="flex flex-col gap-3">
 
-        <div>
-          <span class="text-sm opacity-60">ID de importación</span>
-          <p class="font-semibold">{{ job().id }}</p>
-        </div>
+
 
         <div>
           <span class="text-sm opacity-60">Estado</span>
@@ -61,6 +54,10 @@
 
             }
           </div>
+        </div>
+        <div>
+          <span class="text-sm opacity-60">ID de importación</span>
+          <p class="font-semibold">{{ job().id }}</p>
         </div>
 
         <div>
@@ -118,5 +115,4 @@
       Actualización automática cada 10 segundos.
     </div>
 
-  </div>
 </div>
