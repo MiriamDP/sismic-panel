@@ -31,21 +31,40 @@ export class MapComponent {
   newEarthquake = output<Earthquake>()
   lastReadEffect = effect(() => {
 
-    const value = this.lastRead();
+  const value = this.lastRead();
 
-    if (value instanceof Date || !isNaN(Date.parse(value))) {
-      const dateObj = value instanceof Date ? value : new Date(value);
+  if (value instanceof Date || !isNaN(Date.parse(value))) {
 
-      const date = dateObj.toISOString().split('T')[0];
-      const hour = dateObj.toISOString().split('T')[1].substring(0, 8);
+    const dateObj = value instanceof Date
+      ? value
+      : new Date(value);
 
-      this.lastReadDateEmit.emit(date);
-      this.lastReadHourEmit.emit(hour);
-    } else {
-      this.lastReadDateEmit.emit('Sin fecha');
-      this.lastReadHourEmit.emit('Sin hora');
-    }
-  })
+    // Fecha local
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+
+    const date = `${year}-${month}-${day}`;
+
+    // Hora local
+    const hour = dateObj.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+
+    this.lastReadDateEmit.emit(date);
+    this.lastReadHourEmit.emit(hour);
+
+  } else {
+
+    this.lastReadDateEmit.emit('Sin fecha');
+    this.lastReadHourEmit.emit('Sin hora');
+
+  }
+
+});
   lastReadDateEmit = output<string>();
   lastReadHourEmit = output<string>();
   readonly generated = signal('Sin información');

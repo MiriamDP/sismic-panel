@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams, httpResource } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { map, Observable, tap } from 'rxjs';
+import { inject, Injectable, signal } from '@angular/core';
+import { map, Observable, of, tap } from 'rxjs';
 import { Earthquake, EarthquakeFilters, EarthquakeMetrics, EarthquakeMetricsResponse, EarthquakeResponse, Earthquakes, EarthquakesResponse } from '../interfaces/earthquake';
 import { EarthquakeMappers } from '../mapper/earthquake-mapper';
 import { ImportJob } from '../interfaces/import-job';
@@ -12,6 +12,8 @@ import { environment } from '../../environments/environment';
 export class EarthquakeService {
   private apiUrl = 'http://localhost:8000/api/earthquakes'
   private http = inject(HttpClient)
+  private metricsCache = new Map<string, EarthquakeMetrics>();
+  lastMetricsFilters = signal<Partial<EarthquakeFilters> | null>(null);
 
   // Obtener terremotos almacenados
   getEarthquakes(filters: EarthquakeFilters): Observable<Earthquakes> {
@@ -106,6 +108,28 @@ export class EarthquakeService {
   getEarthquakeMetrics(
     filters: Partial<EarthquakeFilters>
   ): Observable<EarthquakeMetrics> {
+    const today = this.formatDate(new Date());
+
+  // Comprobar si alguno de los filtros incluye el día actual
+  const isToday =
+    filters.startDate === today ||
+    filters.endDate === today;
+
+  // Generar clave de caché
+  const cacheKey = JSON.stringify(filters);
+
+  // Solo consultar caché si no incluye el día actual
+  if (!isToday) {
+
+    const cachedData = this.metricsCache.get(cacheKey);
+
+    if (cachedData) {
+      console.log('Métricas recuperadas de caché');
+
+      return of(cachedData);
+    }
+
+  }
 
     let params = new HttpParams();
 
@@ -131,7 +155,7 @@ export class EarthquakeService {
 
     });
 
-    console.log('Filtros: ',filters)
+    console.log('Filtros: ', filters)
 
     return this.http.get<EarthquakeMetricsResponse>(
       `${this.apiUrl}/metrics`,
@@ -164,10 +188,34 @@ export class EarthquakeService {
 
         }))
 
-      }))
+      })),
+      tap(data => {// Guardar únicamente consultas históricas
+      if (!isToday) {
+        this.metricsCache.set(cacheKey, data);
+        console.log('Métricas guardadas en caché');
+      } else {
+        console.log('Consulta en tiempo real: no se guarda en caché');
+      }
+})
 
     );;
   }
+
+  clearMetricsCache(): void {
+  this.metricsCache.clear();
+}
+
+setLastMetricsFilters(filters: Partial<EarthquakeFilters>): void {
+  this.lastMetricsFilters.set({ ...filters });
+}
+
+private formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
 
 
 }

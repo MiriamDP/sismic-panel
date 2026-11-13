@@ -1,4 +1,4 @@
-import { Component, effect, inject, linkedSignal, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { EarthquakeList } from '../../components/earthquake-list/earthquake-list';
 import { toSignal, rxResource } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -6,11 +6,12 @@ import { map } from 'rxjs';
 import { EarthquakeService } from '../../services/earthquake-service';
 import { Pagination } from '../../components/pagination/pagination';
 import { EarthquakeFilters } from '../../interfaces/earthquake';
-import { LucideSlidersHorizontal } from '@lucide/angular';
+import { CountryService } from '../../services/country-service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-historic-page',
-  imports: [EarthquakeList, Pagination, LucideSlidersHorizontal],
+  imports: [EarthquakeList, Pagination, FormsModule],
   templateUrl: './historic-page.html',
   styleUrl: './historic-page.css',
 })
@@ -18,7 +19,31 @@ export class HistoricPage {
   private earthquakeSvc = inject(EarthquakeService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
+  private countrySvc = inject(CountryService);
 
+  countries = this.countrySvc.countries;
+
+  constructor() {
+     effect(() => {
+    console.log('Código URL:', this.queryParams().countryCode);
+    console.log('Código filtro:', this.filters().countryCode);
+
+    if (this.countries.hasValue()) {
+      console.log(
+        'Existe el país:',
+        this.countries.value().some(
+          country => country.adm0_a3 === this.filters().countryCode
+        )
+      );
+    }
+  });
+    effect(() => {
+      const params = this.queryParams();
+
+      this.filters.set(params);
+      this.appliedFilters.set(params);
+    });
+  }
   queryParams = toSignal(
     this.activatedRoute.queryParamMap.pipe(
       map(params => ({

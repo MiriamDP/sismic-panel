@@ -13,31 +13,54 @@ const DATE_VALUE_PROVIDER: Provider={
 })
 export class DateValueAccessorDirective implements ControlValueAccessor{
 
-  constructor(private element: ElementRef){}
+  constructor(private element: ElementRef<HTMLInputElement>) {}
 
-  @HostListener('input',['$event.target.valueAsDate'])
-  private onChange!: Function;
+  private onChange: (value: Date | null) => void = () => {};
+  private onTouch: () => void = () => {};
 
-  @HostListener('blur',['$event.target.valueAsDate'])
-  private onTouch!: Function;
-
-  writeValue(newValue: any): void {
-    if (newValue instanceof Date){
-      this.element.nativeElement.value=newValue.toISOString().split('T')[0];
+  @HostListener('input', ['$any($event.target).value'])
+  handleInput(value: string): void {
+    if (!value) {
+      this.onChange(null);
+      return;
     }
+
+    const [year, month, day] = value.split('-').map(Number);
+
+    // Crear fecha local sin conversiones UTC
+    this.onChange(new Date(year, month - 1, day));
   }
 
-  registerOnChange(fn: Function): void {
-    this.onChange = (valueAsDate: Date)=>{ fn(valueAsDate);};  
+  @HostListener('blur')
+  handleBlur(): void {
+    this.onTouch();
   }
 
-  registerOnTouched(fn: any): void {
-    this.onTouch=fn;
+  writeValue(newValue: Date | null): void {
+
+    if (!newValue) {
+      this.element.nativeElement.value = '';
+      return;
+    }
+
+    // Obtener fecha utilizando componentes locales
+    const year = newValue.getFullYear();
+    const month = String(newValue.getMonth() + 1).padStart(2, '0');
+    const day = String(newValue.getDate()).padStart(2, '0');
+
+    this.element.nativeElement.value = `${year}-${month}-${day}`;
   }
 
-  setDisabledState?(isDisabled: boolean): void {
-    this.disabled=isDisabled
+  registerOnChange(fn: (value: Date | null) => void): void {
+    this.onChange = fn;
   }
-  disabled=false;
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouch = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.element.nativeElement.disabled = isDisabled;
+  }
   
 }

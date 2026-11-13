@@ -4,11 +4,24 @@
         <span class="label-text">País</span>
         <select class="select select-bordered w-full" formControlName="countryCode">
             <option value="">Todos los países</option>
-            <option value="ESP">España</option>
-            <option value="MEX">México</option>
-            <option value="USA">Estados Unidos</option>
-            <option value="JPN">Japón</option>
-            <option value="unassigned">Sin país asignado</option>
+            @if (countries.isLoading()) {
+            <p class="text-sm text-gray-500">
+                Cargando países...
+            </p>
+            }
+
+            @if (countries.error()) {
+            <p class="text-sm text-error">
+                No se pudieron cargar los países.
+            </p>
+            }
+            @if (countries.hasValue()) {
+            @for (country of countries.value(); track country.adm0_a3) {
+            <option [value]="country.adm0_a3">
+                {{ country.name_es }}
+            </option>
+            }
+            }
         </select>
     </label>
 

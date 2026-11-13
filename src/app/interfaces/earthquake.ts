@@ -13,6 +13,7 @@ export interface EarthquakeResponse {
 export interface Earthquake{
     id: string;
     magnitude: number;
+    
     place: string;
     event_time: string;
     longitude: number;

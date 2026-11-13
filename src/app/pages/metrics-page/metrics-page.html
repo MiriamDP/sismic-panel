@@ -2,7 +2,7 @@
 
   <!-- Filtros -->
   <aside class="lg:col-span-1">
-    <app-form-metrics (form)="filterForm.set($event)">
+    <app-form-metrics (form)="onFiltersChange($event)" [filters]="filterForm()">
     </app-form-metrics>
   </aside>
 

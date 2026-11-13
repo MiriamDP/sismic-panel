@@ -22,14 +22,14 @@ export class MetricsPage {
   private earthquakeSvc=inject(EarthquakeService);
 
 
-  filterForm = signal<Partial<EarthquakeFilters>>({
+  filterForm = signal<Partial<EarthquakeFilters>>(this.earthquakeSvc.lastMetricsFilters() ?? {
     countryCode: null,
-    startDate: this.formatDate(new Date(Date.now())),
-      endDate: this.formatDate(new Date(Date.now())),
-      minMagnitude: null,
-      maxMagnitude: null,
-      minDepth: null,
-      maxDepth: null
+    startDate: this.formatDate(new Date()),
+    endDate: this.formatDate(new Date()),
+    minMagnitude: null,
+    maxMagnitude: null,
+    minDepth: null,
+    maxDepth: null
   });
 
   metrics = rxResource({
@@ -37,9 +37,10 @@ export class MetricsPage {
 
     stream: ({ params }) => {
       if (!params) {
-        of({} as EarthquakeMetrics);
+        return of({} as EarthquakeMetrics);
       }
 
+      this.earthquakeSvc.setLastMetricsFilters(params);
       return this.earthquakeSvc.getEarthquakeMetrics(params);
     }
   });
@@ -62,5 +63,10 @@ export class MetricsPage {
   return data.summary.average_per_hour !== null
     ? 'Media por hora'
     : 'Media diaria';
+}
+
+onFiltersChange(filters: Partial<EarthquakeFilters>): void {
+  this.filterForm.set(filters);
+  this.earthquakeSvc.setLastMetricsFilters(filters);
 }
 }

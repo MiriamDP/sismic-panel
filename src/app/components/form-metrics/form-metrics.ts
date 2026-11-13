@@ -1,8 +1,9 @@
-import { Component, inject, output } from '@angular/core';
+import { Component, effect, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { dateRangeValidator, endDateNotFutureValidator } from '../../utils/validators/date-validator';
 import { DateValueAccessorDirective } from '../../directives/date-value-accessor';
 import { EarthquakeFilters } from '../../interfaces/earthquake';
+import { CountryService } from '../../services/country-service';
 
 @Component({
   selector: 'app-form-metrics',
@@ -13,6 +14,32 @@ import { EarthquakeFilters } from '../../interfaces/earthquake';
 export class FormMetrics {
   private fb = inject(FormBuilder);
   form=output<Partial<EarthquakeFilters>>()
+  filters = input<Partial<EarthquakeFilters> | null>(null);
+
+  private countrySvc = inject(CountryService);
+
+  countries = this.countrySvc.countries;
+
+  constructor() {
+    effect(() => {
+      const filters = this.filters();
+
+      if (!filters) return;
+
+      this.analysisForm.patchValue({
+        countryCode: filters.countryCode ?? '',
+
+        minMagnitude: filters.minMagnitude ?? null,
+        maxMagnitude: filters.maxMagnitude ?? null,
+
+      startDate: this.parseDate(filters.startDate),
+      endDate: this.parseDate(filters.endDate),
+
+        minDepth: filters.minDepth ?? null,
+        maxDepth: filters.maxDepth ?? null
+      });
+    });
+  }
 
   analysisForm = this.fb.group({
     countryCode: '',
@@ -86,5 +113,13 @@ export class FormMetrics {
   const day = String(date.getDate()).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
+}
+
+private parseDate(date: string | null | undefined): Date {
+  if (!date) return new Date();
+
+  const [year, month, day] = date.split('-').map(Number);
+
+  return new Date(year, month - 1, day);
 }
 }
