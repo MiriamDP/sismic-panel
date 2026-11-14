@@ -1,0 +1,88 @@
+
+<cite>Importaciones muy grandes pueden tardar incluso horas en hacerse efectivas.</cite>
+<form [formGroup]="form">
+
+  <div class="card-body">
+
+    <fieldset class="fieldset">
+
+      <label class="label">Fecha inicial *</label>
+
+      <input
+        type="date"
+        class="input w-full"
+        formControlName="start"
+      />
+
+      @if (
+        form.controls.start.invalid &&
+        form.controls.start.touched
+      ) {
+        <p class="text-error text-sm">
+          La fecha inicial es obligatoria.
+        </p>
+      }
+
+      <label class="label">Fecha final *</label>
+
+      <input
+        type="date"
+        class="input w-full"
+        formControlName="end"
+      />
+
+      @if (
+        form.controls.end.invalid &&
+        form.controls.end.touched
+      ) {
+        <p class="text-error text-sm">
+          La fecha final es obligatoria.
+        </p>
+      }
+
+      @if (
+        form.hasError('invalidDateRange') &&
+        form.controls.end.touched
+      ) {
+        <p class="text-error text-sm">
+          La fecha inicial no puede ser posterior a la fecha final.
+        </p>
+      }
+
+      @if (
+        form.hasError('endDateInFuture') &&
+        form.controls.end.touched
+      ) {
+        <p class="text-error text-sm">
+          La fecha final no puede ser posterior a hoy.
+        </p>
+      }
+
+      <label class="label">Magnitud mínima</label>
+
+      <input
+        type="number"
+        class="input w-full"
+        formControlName="mag"
+        min="-2"
+        max="10"
+      />
+
+      @if (form.controls.mag.invalid && form.controls.mag.touched) {
+        <p class="text-error text-sm">
+          La magnitud debe estar entre -2 y 10.
+        </p>
+      }
+
+    </fieldset>
+
+  </div>
+  <button
+  type="button"
+  class="btn btn-primary"
+  [disabled]="form.invalid"
+  (click)="submit()">
+  Iniciar importación
+</button>
+
+</form>

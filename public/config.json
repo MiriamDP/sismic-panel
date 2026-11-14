@@ -1,6 +1,7 @@
 {
-  "mode": "demo",
-  "apiUrl": "https://TU-DOMINIO-NGROK",
+  "mode": "api",
+  "max_earthquakes": 10,
+  "apiUrl": "https://antirust-wackiness-doorpost.ngrok-free.dev",
   "refreshMs": 60000,
-  "skipNgrokWarning": true
+  "skipNgrokWarning": false
 }

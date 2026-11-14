@@ -1,0 +1,142 @@
+<div class="card bg-base-100 shadow-md">
+
+    <div class="card-body">
+
+        <h2 class="card-title text-lg">
+            <i class="fa-solid fa-house-crack text-primary"></i>
+            Terremotos de mayor magnitud
+        </h2>
+
+        <p class="text-sm opacity-60">
+            Comparación del terremoto más fuerte registrado en cada periodo.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <!-- Primer año -->
+            <div class="rounded-xl border border-base-300 p-4 space-y-3">
+
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold">{{ firstYear() }}</span>
+                    <span class="badge badge-primary">Primer periodo</span>
+                </div>
+
+                @if (firstEarthquake(); as earthquake) {
+
+                <div class="text-center py-3">
+                    <p class="text-4xl font-bold text-primary">
+                        {{ earthquake.magnitude | number:'1.1-2' }}
+                    </p>
+
+                    <p class="text-sm opacity-60">
+                        Magnitud
+                    </p>
+                </div>
+
+                <div class="space-y-2 text-sm">
+
+                    <p>
+                        <i class="fa-solid fa-location-dot mr-2 opacity-60"></i>
+                        {{ earthquake.place }}
+                    </p>
+
+                    <p>
+                        <i class="fa-regular fa-calendar mr-2 opacity-60"></i>
+                        {{ earthquake.event_time | date:'dd/MM/yyyy HH:mm':'UTC' }}
+                    </p>
+
+                    <p>
+                        <i class="fa-solid fa-arrows-down-to-line mr-2 opacity-60"></i>
+                        Profundidad: {{ earthquake.depth }} km
+                    </p>
+
+                </div>
+
+                } @else {
+
+                <p class="text-center py-8 opacity-60">
+                    No hay terremotos registrados.
+                </p>
+
+                }
+
+            </div>
+
+            <!-- Segundo año -->
+            <div class="rounded-xl border border-base-300 p-4 space-y-3">
+
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold">{{ secondYear() }}</span>
+                    <span class="badge badge-success">Segundo periodo</span>
+                </div>
+
+                @if (secondEarthquake(); as earthquake) {
+
+                <div class="text-center py-3">
+                    <p class="text-4xl font-bold text-success">
+                        {{ earthquake.magnitude | number:'1.1-2' }}
+                    </p>
+
+                    <p class="text-sm opacity-60">
+                        Magnitud
+                    </p>
+                </div>
+
+                <div class="space-y-2 text-sm">
+
+                    <p>
+                        <i class="fa-solid fa-location-dot mr-2 opacity-60"></i>
+                        {{ earthquake.place }}
+                    </p>
+
+                    <p>
+                        <i class="fa-regular fa-calendar mr-2 opacity-60"></i>
+                        {{ earthquake.event_time | date:'dd/MM/yyyy HH:mm':'UTC' }}
+                    </p>
+
+                    @if (earthquake.depth !== null) {
+                    Profundidad: {{ earthquake.depth }} km
+                    } @else {
+                    Profundidad no disponible
+                    }
+
+                </div>
+
+                } @else {
+
+                <p class="text-center py-8 opacity-60">
+                    No hay terremotos registrados.
+                </p>
+
+                }
+
+            </div>
+
+        </div>
+
+        <!-- Diferencia -->
+        @if (magnitudeDifference() !== null) {
+
+        <div class="divider"></div>
+
+        <div class="flex justify-between items-center">
+
+            <span class="text-sm opacity-60">
+                Diferencia de magnitud
+            </span>
+
+            <span class="font-bold" [class.text-success]="magnitudeDifference()! < 0"
+                [class.text-error]="magnitudeDifference()! > 0">
+
+                {{ magnitudeDifference()! > 0 ? '+' : '' }}
+                {{ magnitudeDifference()! | number:'1.2-2' }}
+
+            </span>
+
+        </div>
+
+        }
+
+    </div>
+
+</div>

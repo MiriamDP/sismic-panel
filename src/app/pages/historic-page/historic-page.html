@@ -1,1 +1,239 @@
-<app-earthquake-list></app-earthquake-list>
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+  <!-- PANEL LATERAL DE FILTROS -->
+  <aside class="lg:col-span-1">
+
+    <div class="card bg-base-200 shadow-md p-4">
+
+      <h2 class="text-lg text-secondary font-bold mb-4">
+        Filtros
+      </h2>
+
+      <div class="flex flex-col gap-4">
+
+        <!-- País -->
+        <label class="form-control w-full">
+          <span class="label-text mb-1">País</span>
+          <select class="select select-bordered w-full" [ngModel]="filters().countryCode"
+            (ngModelChange)="updateFilter('countryCode', $event || null)">
+
+            <option value="">Todos los países</option>
+            @if (countries.isLoading()) {
+            <p class="text-sm text-gray-500">
+              Cargando países...
+            </p>
+            }
+
+            @if (countries.error()) {
+            <p class="text-sm text-error">
+              No se pudieron cargar los países.
+            </p>
+            }
+            @if (countries.hasValue()) {
+            @for (country of countries.value(); track country.adm0_a3) {
+            <option [value]="country.adm0_a3">
+              {{ country.name_es }}
+            </option>
+            }
+            }
+
+          </select>
+        </label>
+
+        <!-- Magnitud -->
+        <div>
+          <h3 class="font-semibold text-sm mb-2">Magnitud</h3>
+
+          <div class="flex flex-col gap-2">
+
+            <label class="form-control">
+              <span class="label-text">Mínima</span>
+
+              <input type="number" step="0.1" class="input input-bordered w-full" [value]="filters().minMagnitude ?? ''"
+                (change)="updateFilter(
+                    'minMagnitude',
+                    $any($event.target).value === ''
+                      ? null
+                      : +$any($event.target).value
+                  )">
+            </label>
+
+            <label class="form-control">
+              <span class="label-text">Máxima</span>
+
+              <input type="number" step="0.1" class="input input-bordered w-full" [value]="filters().maxMagnitude ?? ''"
+                (change)="updateFilter(
+                    'maxMagnitude',
+                    $any($event.target).value === ''
+                      ? null
+                      : +$any($event.target).value
+                  )">
+            </label>
+
+          </div>
+        </div>
+
+        <div class="divider my-0"></div>
+
+        <!-- Fechas -->
+        <div>
+          <h3 class="font-semibold text-sm mb-2">Fecha</h3>
+
+          <div class="flex flex-col gap-2">
+
+            <label class="form-control">
+              <span class="label-text">Desde</span>
+
+              <input type="date" class="input input-bordered w-full" [value]="filters().startDate ?? ''" (change)="updateFilter(
+                    'startDate',
+                    $any($event.target).value || null
+                  )">
+            </label>
+
+            <label class="form-control">
+              <span class="label-text">Hasta</span>
+
+              <input type="date" class="input input-bordered w-full" [value]="filters().endDate ?? ''" (change)="updateFilter(
+                    'endDate',
+                    $any($event.target).value || null
+                  )">
+            </label>
+
+          </div>
+        </div>
+
+        <div class="divider my-0"></div>
+
+        <!-- Profundidad -->
+        <div>
+          <h3 class="font-semibold text-sm mb-2">
+            Profundidad (km)
+          </h3>
+
+          <div class="flex flex-col gap-2">
+
+            <label class="form-control">
+              <span class="label-text">Mínima</span>
+
+              <input type="number" class="input input-bordered w-full" [value]="filters().minDepth ?? ''" (change)="updateFilter(
+                    'minDepth',
+                    $any($event.target).value === ''
+                      ? null
+                      : +$any($event.target).value
+                  )">
+            </label>
+
+            <label class="form-control">
+              <span class="label-text">Máxima</span>
+
+              <input type="number" class="input input-bordered w-full" [value]="filters().maxDepth ?? ''" (change)="updateFilter(
+                    'maxDepth',
+                    $any($event.target).value === ''
+                      ? null
+                      : +$any($event.target).value
+                  )">
+            </label>
+
+          </div>
+        </div>
+
+        <!-- Limpiar -->
+        <button class="btn btn-outline btn-block mt-2" (click)="clearFilters()">
+
+          <i class="fa-solid fa-eraser"></i>
+          Limpiar filtros
+
+        </button>
+
+        <button class="btn btn-primary btn-block mt-2" (click)="applyFilters()">
+
+          Aplicar filtros
+
+        </button>
+
+      </div>
+    </div>
+
+  </aside>
+
+  <main class="lg:col-span-3 min-w-0">
+    @if (earthquakesResource.isLoading()) {
+    <p class=" lg:col-span-3 min-w-0">
+
+      <span class="loading loading-spinner text-primary"></span>Cargando terremotos...
+    </p>
+    }
+
+    @if (earthquakesResource.error()) {
+    <p class=" lg:col-span-3 min-w-0">Error al cargar los terremotos.</p>
+    <button class="btn btn-info" (click)="reload()">
+      Reintentar
+    </button>
+    }
+    @if (earthquakesResource.hasValue()) {
+    <!-- CONTENIDO PRINCIPAL -->
+
+    <!-- Información -->
+    <div class="card bg-base-200 shadow-sm p-4 mb-4">
+
+      <div class="flex flex-wrap justify-between items-center gap-4">
+
+        <div>
+          <p class="text-sm opacity-70">Página</p>
+          <p class="text-xl font-bold">
+            {{ earthquakesResource.value().pagination.page }}
+            /
+            {{ earthquakesResource.value().pagination.total_pages }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-sm opacity-70">Total de terremotos</p>
+          <p class="text-xl font-bold">
+            {{ earthquakesResource.value().pagination.total_items }}
+          </p>
+        </div>
+
+        <label class="form-control">
+          <span class="label-text">Terremotos por página</span>
+
+          <select class="select select-bordered" [value]="filters().pageSize"
+            (change)="changePageSize(+$any($event.target).value)">
+
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+
+          </select>
+        </label>
+
+      </div>
+
+    </div>
+
+    <!-- Tabla -->
+    <div class="card bg-base-100 shadow-md">
+
+      <div class="overflow-x-auto">
+
+        <app-earthquake-list [earthquakes]="earthquakesResource.value().items">
+        </app-earthquake-list>
+
+      </div>
+
+    </div>
+
+    <!-- Paginación -->
+    <div class="flex justify-center mt-6">
+
+      <app-pagination [currentPage]="earthquakesResource.value().pagination.page"
+        [pages]="earthquakesResource.value().pagination.total_pages" (pageChange)="changePage($event)">
+      </app-pagination>
+
+    </div>
+
+
+    }
+  </main>
+</div>

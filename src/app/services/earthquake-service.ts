@@ -1,40 +1,70 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Earthquake, EarthquakeResponse } from '../interfaces/earthquake';
+import { HttpClient, HttpParams, httpResource } from '@angular/common/http';
+import { inject, Injectable, signal } from '@angular/core';
+import { map, Observable, of, tap } from 'rxjs';
+import { EarthquakeComparisonFilters, EarthquakeComparisonMetrics, EarthquakeComparisonMetricsResponse, EarthquakeFilters, EarthquakeMetrics, EarthquakeMetricsResponse, EarthquakeResponse, Earthquakes, EarthquakesResponse } from '../interfaces/earthquake';
+import { EarthquakeMappers } from '../mapper/earthquake-mapper';
+import { ImportJob } from '../interfaces/import-job';
+import { ConfigService } from './config-service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class EarthquakeService {
-  private apiUrl='http://localhost:8000'
-  private http=inject(HttpClient)
+  private configSvc=inject(ConfigService);
+  private http = inject(HttpClient)
+  private metricsCache = new Map<string, EarthquakeMetrics>();
+  lastMetricsFilters = signal<Partial<EarthquakeFilters> | null>(null);
 
   // Obtener terremotos almacenados
-  getEarthquakes(
-    page: number,
-    pageSize: number = 20
-  ): Observable<EarthquakeResponse> {
+  getEarthquakes(filters: EarthquakeFilters): Observable<Earthquakes> {
 
-    const params = new HttpParams()
-      .set('page', page)
-      .set('page_size', pageSize);
+    let params = new HttpParams()
+      .set('page', filters.page)
+      .set('page_size', filters.pageSize);
 
-    return this.http.get<EarthquakeResponse>(
-      `${this.apiUrl}/earthquakes`,
+    if (filters.countryCode !== null) {
+      params = params.set('country_code', filters.countryCode);
+    }
+
+    if (filters.startDate) {
+      params = params.set('start_date', filters.startDate);
+    }
+
+    if (filters.endDate) {
+      params = params.set('end_date', filters.endDate);
+    }
+
+    if (filters.minMagnitude !== null) {
+      params = params.set('min_magnitude', filters.minMagnitude);
+    }
+
+    if (filters.maxMagnitude !== null) {
+      params = params.set('max_magnitude', filters.maxMagnitude);
+    }
+
+    if (filters.minDepth !== null) {
+      params = params.set('min_depth', filters.minDepth);
+    }
+
+    if (filters.maxDepth !== null) {
+      params = params.set('max_depth', filters.maxDepth);
+    }
+    return this.http.get<EarthquakesResponse>(
+      `${this.configSvc.settings.apiUrl}/api/earthquakes`,
       { params }
+    ).pipe(
+      map(response => ({ ...response, items: EarthquakeMappers.mapEarthquakes(response.items) }))
     );
   }
 
-  // Comprobar estado de la API
-  getHealth(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/health`);
-  }
-
   // Consultar estado de importación histórica
-  getImportStatus(): Observable<any> {
-    return this.http.get(
-      `${this.apiUrl}/earthquakes/import-history/status`
+  getEarthquake(id: string) {
+    return httpResource(
+      () => `${this.configSvc.settings.apiUrl}/api/earthquakes/${id}`,
+      {
+        parse: (response) =>
+          EarthquakeMappers.mapEarthquake(response as EarthquakeResponse)
+      }
     );
   }
 
@@ -46,7 +76,7 @@ export class EarthquakeService {
   ): Observable<any> {
 
     return this.http.post(
-      `${this.apiUrl}/earthquakes/import-history`,
+      `${this.configSvc.settings.apiUrl}/api/earthquakes/import-history`,
       {
         start_date: startDate,
         end_date: endDate,
@@ -54,5 +84,249 @@ export class EarthquakeService {
       }
     );
   }
+  // Obetener importacines histórica
+  getImports(): Observable<ImportJob[]> {
+
+    return this.http.get<ImportJob[]>(
+      `${this.configSvc.settings.apiUrl}/api/earthquakes/import-history/jobs`
+    );
+  }
+
+  getImportStatus() {
+    return this.http.get<any>(
+      `${this.configSvc.settings.apiUrl}/api/earthquakes/import-history/status`
+    );
+  }
+
+  getLatest(limit: number = this.configSvc.settings.max_earthquakes) {
+    return this.http.get<EarthquakeResponse[]>(`${this.configSvc.settings.apiUrl}/api/earthquakes/latest?limit=${limit}`).pipe(
+      map(response => EarthquakeMappers.mapEarthquakes(response))
+    )
+  }
+
+  getEarthquakeMetrics(
+    filters: Partial<EarthquakeFilters>
+  ): Observable<EarthquakeMetrics> {
+    const today = this.formatDate(new Date());
+
+    // Comprobar si alguno de los filtros incluye el día actual
+    const isToday =
+      filters.startDate === today ||
+      filters.endDate === today;
+
+    // Generar clave de caché
+    const cacheKey = JSON.stringify(filters);
+
+    // Solo consultar caché si no incluye el día actual
+    if (!isToday) {
+
+      const cachedData = this.metricsCache.get(cacheKey);
+
+      if (cachedData) {
+
+        return of(cachedData);
+      }
+
+    }
+
+    let params = new HttpParams();
+
+    const parameterMap: Record<string, string> = {
+      countryCode: 'country_code',
+      startDate: 'start_date',
+      endDate: 'end_date',
+      minMagnitude: 'min_magnitude',
+      maxMagnitude: 'max_magnitude',
+      minDepth: 'min_depth',
+      maxDepth: 'max_depth'
+    };
+
+    Object.entries(filters).forEach(([key, value]) => {
+
+      if (value !== null && value !== undefined) {
+
+        const apiKey = parameterMap[key] ?? key;
+
+        params = params.set(apiKey, String(value));
+
+      }
+
+    });
+
+
+    return this.http.get<EarthquakeMetricsResponse>(
+      `${this.configSvc.settings.apiUrl}/api/earthquakes/metrics`,
+      { params }
+    ).pipe(
+
+      map(response => ({
+
+        ...response,
+
+        summary: {
+          ...response.summary,
+
+          max_earthquake: response.summary.max_earthquake
+            ? EarthquakeMappers.mapEarthquake(
+              response.summary.max_earthquake
+            )
+            : null
+        },
+
+        top_countries: response.top_countries.map(country => ({
+
+          ...country,
+
+          max_earthquake: country.max_earthquake
+            ? EarthquakeMappers.mapEarthquake(
+              country.max_earthquake
+            )
+            : null
+
+        }))
+
+      })),
+      tap(data => {// Guardar únicamente consultas históricas
+        if (!isToday) {
+          this.metricsCache.set(cacheKey, data);
+        }
+      })
+
+    );;
+  }
+
+  clearMetricsCache(): void {
+    this.metricsCache.clear();
+    this.comparisonMetricsCache.clear();
+  }
+
+  setLastMetricsFilters(filters: Partial<EarthquakeFilters>): void {
+    this.lastMetricsFilters.set({ ...filters });
+  }
+
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  }
+
+  private comparisonMetricsCache = new Map<string, EarthquakeComparisonMetrics>();
+
+  getEarthquakeComparison(
+    filters: Partial<EarthquakeComparisonFilters>
+  ): Observable<EarthquakeComparisonMetrics> {
+
+    const cacheKey = JSON.stringify(filters);
+
+    const currentYear = new Date().getFullYear();
+
+    // Solo almacenar comparaciones de años completamente históricos.
+    const isHistorical =
+      filters.firstYear !== undefined &&
+      filters.secondYear !== undefined &&
+      filters.firstYear < currentYear &&
+      filters.secondYear < currentYear;
+
+    if (isHistorical) {
+
+      const cachedData = this.comparisonMetricsCache.get(cacheKey);
+
+      if (cachedData) {
+        return of(cachedData);
+      }
+
+    }
+
+    let params = new HttpParams();
+
+    const parameterMap: Record<string, string> = {
+      countryCode: 'country_code',
+      startDay: 'start_day',
+      startMonth: 'start_month',
+      endDay: 'end_day',
+      endMonth: 'end_month',
+      firstYear: 'first_year',
+      secondYear: 'second_year',
+      minMagnitude: 'min_magnitude',
+      maxMagnitude: 'max_magnitude',
+      minDepth: 'min_depth',
+      maxDepth: 'max_depth'
+    };
+
+    Object.entries(filters).forEach(([key, value]) => {
+
+      if (value !== null && value !== undefined) {
+
+        const apiKey = parameterMap[key] ?? key;
+
+        params = params.set(apiKey, String(value));
+
+      }
+
+    });
+
+    return this.http.get<EarthquakeComparisonMetricsResponse>(
+      `${this.configSvc.settings.apiUrl}/api/earthquakes/metrics/comparison`,
+      { params }
+    ).pipe(
+
+      map(response => ({
+        first_year: response.first_year,
+        second_year: response.second_year,
+
+        first_period: this.mapMetricsResponse(response.first_period),
+        second_period: this.mapMetricsResponse(response.second_period)
+      })),
+
+      tap(data => {
+
+        if (isHistorical) {
+          this.comparisonMetricsCache.set(cacheKey, data);
+        }
+
+      })
+
+    );
+
+  }
+
+  private mapMetricsResponse(
+    response: EarthquakeMetricsResponse
+  ): EarthquakeMetrics {
+
+    return {
+
+      ...response,
+
+      summary: {
+        ...response.summary,
+
+        max_earthquake: response.summary.max_earthquake
+          ? EarthquakeMappers.mapEarthquake(
+            response.summary.max_earthquake
+          )
+          : null
+      },
+
+      top_countries: response.top_countries.map(country => ({
+
+        ...country,
+
+        max_earthquake: country.max_earthquake
+          ? EarthquakeMappers.mapEarthquake(
+            country.max_earthquake
+          )
+          : null
+
+      }))
+
+    };
+
+  }
+
+
+
 }
 

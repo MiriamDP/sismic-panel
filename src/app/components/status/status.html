@@ -1,4 +1,19 @@
-<div class="inline-grid *:[grid-area:1/1]">
-  <div class="status status-error animate-ping"></div>
-  <div class="status status-error"></div>
-</div> Server is down
+<div class="flex items-center gap-2">
+
+  <div class="inline-grid *:[grid-area:1/1]">
+
+    @if (serverAvailable()) {
+      <div class="status status-success animate-ping"></div>
+      <div class="status status-success"></div>
+    } @else {
+      <div class="status status-error animate-ping"></div>
+      <div class="status status-error"></div>
+    }
+
+  </div>
+
+  <span>
+    {{ serverAvailable() ? 'Conectado' : 'Sin conexión' }}
+  </span>
+
+</div>

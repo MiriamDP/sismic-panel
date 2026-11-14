@@ -1,0 +1,65 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+  <!-- Primera columna -->
+  <div>
+    <table class="table table-zebra table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Lugar</th>
+          <th>Hora</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (earthquake of earthquakes().slice(0, halfLength()); track earthquake.id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/historic', earthquake.id]" class="link link-primary">
+                {{ earthquake.id }}
+              </a>
+            </td>
+            <td>
+              <a [routerLink]="['/historic', earthquake.id]" class="link link-hover">
+                {{ earthquake.place }}
+              </a>
+            </td>
+            <td>{{ earthquake.event_time | date:'HH:mm' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Segunda columna -->
+  <div>
+    <table class="table table-zebra table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Lugar</th>
+          <th>Hora</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (earthquake of earthquakes().slice(halfLength()); track earthquake.id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/historic', earthquake.id]" class="link link-primary">
+                {{ earthquake.id }}
+              </a>
+            </td>
+            <td>
+              <a [routerLink]="['/historic', earthquake.id]" class="link link-hover">
+                {{ earthquake.place }}
+              </a>
+            </td>
+            <td>{{ earthquake.event_time | date:'HH:mm' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+</div>

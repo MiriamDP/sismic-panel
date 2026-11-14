@@ -1,1 +1,17 @@
-<app-map></app-map>
+<div class="stats shadow flex flex-wrap w-full">
+    <app-stat title="Ultima lectura" [value]="hour()" [subtitle]="date()" [icon]="statIcons.clock"></app-stat>
+    <app-stat title="Ultima terremoto registrado" [value]="earthquake()?.place ??'Sin ubicación'" [subtitle]="earthquake()?.id" [icon]="statIcons.map_pinned"></app-stat>
+</div>
+<div class="stats shadow">
+    <app-stat title="Eventos en el mapa" [value]="count()" [icon]="statIcons.trending_up"></app-stat>
+    <app-stat title="Eventos unicos durante la sesion" [value]="total()" [icon]="statIcons.total"></app-stat>
+    <app-stat title="Eventos omitidos durante la sesion" [value]="omitted()" subtitle="Coordenadas o fecha invalida" [icon]="statIcons.octagon_x"></app-stat>
+
+</div>
+<app-map (countEmit)="count.set($event)" 
+(lastReadDateEmit)="date.set($event)" 
+(lastReadHourEmit)="hour.set($event)" 
+(omittedCount)="omitted.set($event)"
+(totalEarthquakesEmit)="total.set($event)"
+(newEarthquake)="earthquake.set($event)"></app-map>
+<app-session-list></app-session-list>

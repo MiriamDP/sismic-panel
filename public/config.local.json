@@ -1,0 +1,7 @@
+{
+  "mode": "api",
+  "max_earthquakes": 5,
+  "apiUrl": "http://localhost:8000",
+  "refreshMs": 60000,
+  "skipNgrokWarning": false
+}

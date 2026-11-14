@@ -1,0 +1,68 @@
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+  <!-- Filtros -->
+  <aside class="lg:col-span-1">
+    <app-form-metrics (form)="onFiltersChange($event)" [filters]="filterForm()">
+    </app-form-metrics>
+  </aside>
+
+  <!-- Resultados -->
+  <main class="lg:col-span-3 min-w-0 space-y-6">
+
+    @if (metrics.isLoading()) {
+
+    <div class="flex justify-center items-center py-16">
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+      <span class="ml-3">Calculando estadísticas...</span>
+    </div>
+
+    }
+
+    @if (metrics.error()) {
+
+    <div class="alert alert-error">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>No se pudieron cargar las estadísticas.</span>
+    </div>
+
+    }
+
+    @if (metrics.hasValue()) {
+
+    @if (metrics.value(); as data) {
+
+    <!-- Resumen -->
+    <app-metrics-summary [data]="data.summary" [averageLabel]="averageLabel">
+    </app-metrics-summary>
+
+    <!-- Terremoto máximo -->
+    <app-max-earthquake [earthquake]="data.summary.max_earthquake">
+    </app-max-earthquake>
+
+    <!-- Ranking -->
+
+    <!-- Distribución temporal -->
+    <app-time-distribution [data]="data.time_distribution">
+    </app-time-distribution>
+
+    <!-- Gráficos secundarios -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+      <app-magnitude-depth [data]="data.magnitude_depth">
+      </app-magnitude-depth>
+
+      <app-earthquake-evolution [data]="data.time_distribution">
+      </app-earthquake-evolution>
+
+    </div>
+
+        <app-top-contries [countries]="data.top_countries">
+    </app-top-contries>
+
+    }
+
+    }
+
+  </main>
+
+</div>

@@ -1,0 +1,16 @@
+<div class="card bg-base-100 shadow-md">
+
+  <div class="card-body">
+
+    <h2 class="card-title text-lg">
+      <i class="fa-solid fa-chart-column text-primary"></i>
+      Terremotos {{ granularityLabel() }}
+    </h2>
+
+    <app-base-chart
+      [config]="chartConfig()">
+    </app-base-chart>
+
+  </div>
+
+</div>

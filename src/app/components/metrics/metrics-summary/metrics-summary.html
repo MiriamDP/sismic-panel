@@ -1,0 +1,19 @@
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+
+  <!-- Total -->
+  <div class="card bg-base-100 shadow-md">
+      <app-stat title="Total de terremotos" [value]="data().total_earthquakes | number" subtitle="En el periodo seleccionado" [icon]="icons_stats.total"></app-stat>
+  </div>
+  <div class="card bg-base-100 shadow-md">
+      <app-stat [title]="averageLabel()" [value]="data().average_per_hour ??
+          data().average_per_day ?? 0
+          | number:'1.2-2'"  subtitle="En el periodo seleccionado" [icon]="icons.average"></app-stat>
+  </div>
+  <div class="card bg-base-100 shadow-md">
+      <app-stat title="Magnitud media" [value]="data().average_magnitude ?? '—'" subtitle="Escala de magnitud" [icon]="icons.activity"></app-stat>
+  </div>
+  <div class="card bg-base-100 shadow-md">
+      <app-stat title="Profundidad media" [value]=" data().average_depth ?? '—' " subtitle="Kilómetros" [icon]="icons.depth"></app-stat>
+  </div>
+
+</div>

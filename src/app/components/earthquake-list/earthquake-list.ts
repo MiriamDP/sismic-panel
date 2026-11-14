@@ -1,88 +1,65 @@
-import { Component, effect, inject, linkedSignal, signal } from '@angular/core';
-import { rxResource, toSignal } from '@angular/core/rxjs-interop';
-import { EarthquakeService } from '../../services/earthquake-service';
+import { Component, computed,  inject, input } from '@angular/core';
+import {  toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute,  RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import { Earthquake } from '../../interfaces/earthquake';
 
 @Component({
   selector: 'app-earthquake-list',
-  imports: [DatePipe],
+  imports: [DatePipe,  RouterLink],
   templateUrl: './earthquake-list.html',
   styleUrl: './earthquake-list.css',
 })
 export class EarthquakeList {
-  private earthquakeSvc=inject(EarthquakeService);
-  private router = inject(Router);
-  private activatedRoute = inject(ActivatedRoute);
+  earthquakes = input<Earthquake[]>()
+  private route = inject(ActivatedRoute);
+  today = new Date();
 
-  queryParams  = toSignal(this.activatedRoute.queryParamMap.pipe(
-    map(params => ({
-        page: Number(params.get('page')) || 1,
-        pageSize: Number(params.get('pageSize')) || 20
-      })),
-  ), {
-    initialValue: {
+  queryParams = toSignal(
+    this.route.queryParamMap.pipe(
+      map(params => ({
+        page: Number(params.get('page') ?? 1),
+        pageSize: Number(params.get('pageSize') ?? 20),
+
+        countryCode: params.get('countryCode'),
+        startDate: params.get('startDate'),
+        endDate: params.get('endDate'),
+
+        minMagnitude: params.get('minMagnitude'),
+        maxMagnitude: params.get('maxMagnitude'),
+
+        minDepth: params.get('minDepth'),
+        maxDepth: params.get('maxDepth')
+      }))
+    ),
+    {
+      initialValue: {
         page: 1,
-        pageSize: 20
+        pageSize: 20,
+        countryCode: null,
+        startDate: null,
+        endDate: null,
+        minMagnitude: null,
+        maxMagnitude: null,
+        minDepth: null,
+        maxDepth: null
       }
-  });
+    }
+  );
 
-  page = linkedSignal(() => this.queryParams().page);
-  pageSize = linkedSignal(() => this.queryParams().pageSize);
+  currentPage = computed(() => this.queryParams().page);
+  pageSize = computed(() => this.queryParams().pageSize);
+
+  isToday(date: string | Date): boolean {
+    const eventDate = new Date(date);
+    const today = new Date();
+
+    return eventDate.getDate() === today.getDate() &&
+      eventDate.getMonth() === today.getMonth() &&
+      eventDate.getFullYear() === today.getFullYear();
+  }
 
   
-  navigateEffect=effect(() => {
-      this.router.navigate([], {
-        relativeTo: this.activatedRoute,
-        queryParams: {
-          page: this.page(),
-          pageSize: this.pageSize()
-        },
-        queryParamsHandling: 'merge'
-      });
-    });
-
-  earthquakesResource=rxResource(
-    {
-    params: () => { return {
-      page: this.page(),pageSize:this.pageSize()
-    }},
-    stream: ({ params }) => {
-      return this.earthquakeSvc.getEarthquakes(
-        params.page,
-        params.pageSize
-      );
-    },
-  }
-  )
-// Ir a la página siguiente
-  nextPage(): void {
-    const pagination = this.earthquakesResource.value()?.pagination;
-
-    if (pagination?.has_next) {
-      this.page.update(value => value + 1);
-    }
-  }
-
-  // Ir a la página anterior
-  previousPage(): void {
-    const pagination = this.earthquakesResource.value()?.pagination;
-
-    if (pagination?.has_previous) {
-      this.page.update(value => value - 1);
-    }
-  }
-
-  // Cambiar tamaño de página
-  changePageSize(size: number): void {
-    this.pageSize.set(size);
-    this.page.set(1);
-  }
-
-  // Recargar datos
-  reload(): void {
-    this.earthquakesResource.reload();
-  }
 }
 

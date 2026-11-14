@@ -1,0 +1,21 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>id</th>
+      <th>status</th>
+      <th>Inicio periodo</th>
+      <th>Fin periodo</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (job of imports();track job.id) {
+    <tr class="cursor-pointer  hover:bg-base-200">
+      <td>{{ job.id }}</td>
+      <td>{{ job.status }}</td>
+      <td>{{ job.start_date | date:'short' }}</td>
+      <td>{{ job.end_date | date:'short' }}</td>
+    </tr>
+    }
+
+  </tbody>
+</table>
