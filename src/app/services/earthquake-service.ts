@@ -100,7 +100,6 @@ export class EarthquakeService {
 
   getLatest(limit: number = environment.MAX_EARTHQUAKES) {
     return this.http.get<EarthquakeResponse[]>(`${this.apiUrl}/latest?limit=${limit}`).pipe(
-      tap(resp => console.log('Respuesta recibida', resp)),
       map(response => EarthquakeMappers.mapEarthquakes(response))
     )
   }
@@ -124,7 +123,6 @@ export class EarthquakeService {
       const cachedData = this.metricsCache.get(cacheKey);
 
       if (cachedData) {
-        console.log('Métricas recuperadas de caché');
 
         return of(cachedData);
       }
@@ -155,7 +153,6 @@ export class EarthquakeService {
 
     });
 
-    console.log('Filtros: ', filters)
 
     return this.http.get<EarthquakeMetricsResponse>(
       `${this.apiUrl}/metrics`,
@@ -192,9 +189,6 @@ export class EarthquakeService {
       tap(data => {// Guardar únicamente consultas históricas
         if (!isToday) {
           this.metricsCache.set(cacheKey, data);
-          console.log('Métricas guardadas en caché');
-        } else {
-          console.log('Consulta en tiempo real: no se guarda en caché');
         }
       })
 
@@ -240,7 +234,6 @@ export class EarthquakeService {
       const cachedData = this.comparisonMetricsCache.get(cacheKey);
 
       if (cachedData) {
-        console.log('Comparativa recuperada de caché');
         return of(cachedData);
       }
 
@@ -291,7 +284,6 @@ export class EarthquakeService {
 
         if (isHistorical) {
           this.comparisonMetricsCache.set(cacheKey, data);
-          console.log('Comparativa guardada en caché');
         }
 
       })

@@ -24,19 +24,6 @@ export class HistoricPage {
   countries = this.countrySvc.countries;
 
   constructor() {
-     effect(() => {
-    console.log('Código URL:', this.queryParams().countryCode);
-    console.log('Código filtro:', this.filters().countryCode);
-
-    if (this.countries.hasValue()) {
-      console.log(
-        'Existe el país:',
-        this.countries.value().some(
-          country => country.adm0_a3 === this.filters().countryCode
-        )
-      );
-    }
-  });
     effect(() => {
       const params = this.queryParams();
 
@@ -142,6 +129,11 @@ export class HistoricPage {
   changePage(page: number): void {
 
     this.filters.update(filters => ({
+      ...filters,
+      page
+    }));
+
+    this.appliedFilters.update(filters => ({
       ...filters,
       page
     }));

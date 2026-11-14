@@ -52,9 +52,6 @@ export class ComparationPage {
     this.filterForm.set(filters);
     this.hasSearched.set(true);
 
-
-    console.log('Filtros de comparación:', filters);
-
   }
 
   get averageLabel(): string {

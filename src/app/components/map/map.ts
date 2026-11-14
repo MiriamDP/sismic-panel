@@ -97,7 +97,6 @@ export class MapComponent {
     effect(() => {
       const earthquakes = this.earthquakeStore.earthquakes();
       if (!this.map || !this.mapReady) { return; }
-      console.log('Llamamos a syncEarthquakes desde el constructor')
       this.syncEarthquakes(earthquakes);
     });
   }
@@ -268,8 +267,6 @@ export class MapComponent {
     earthquake: Earthquake
   ): L.CircleMarker {
 
-    // console.log('Creando marcador:', earthquake);
-
     const {
       magnitude,
       place,
@@ -311,13 +308,7 @@ export class MapComponent {
 
     marker.on('click', () => {
 
-      console.log('CLICK DETECTADO:', earthquake.id);
-
-      console.log('Popup asociado:', !!marker.getPopup());
-
       marker.openPopup();
-
-      console.log('Popup abierto:', marker.isPopupOpen());
 
     });
 
@@ -439,13 +430,6 @@ export class MapComponent {
       this.newEarthquake.emit(latestEarthquake);
     }
 
-    // console.log('Lo que hay en el storage', earthquakes)
-    // console.log('Total recibidos:', earthquakes.length);
-    // console.log('Coordenadas válidas:', validCoordinates.length);
-    // console.log('Coordenadas inválidas:', invalidCoordinates);
-    // console.log('Excluidos por límite:', excludedByLimit);
-    // console.log('Terremotos que se pintarán:', validEarthquakes.length);
-
     // IDs que deben permanecer en el mapa
     const currentIds = new Set(
       validEarthquakes.map(event => event.id)
@@ -541,13 +525,6 @@ export class MapComponent {
           fillColor: color
         });
 
-        // console.log('Actualizando marcador:', {
-        //   id: earthquake.id,
-        //   place: earthquake.place,
-        //   magnitude: earthquake.magnitude,
-        //   event_time: earthquake.event_time
-        // });
-
         this.updateMarkerPopup(existingMarker, earthquake);
 
       }
@@ -562,21 +539,6 @@ export class MapComponent {
     this.count.set(this.earthquakeMarkers.size);
 
     this.lastRead.set(new Date());
-
-    // console.log('Marcadores registrados:', this.earthquakeMarkers.size);
-
-    // for (const [id, marker] of this.earthquakeMarkers) {
-
-    //   console.log({
-    //     id,
-    //     popup: marker.getPopup(),
-    //     hasPopup: marker.isPopupOpen(),
-    //     latlng: marker.getLatLng(),
-    //     mapAttached: this.map?.hasLayer(marker) ?? false,
-    //     clickListeners: marker.listens('click')
-    //   });
-
-    // }
 
   }
 

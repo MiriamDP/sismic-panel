@@ -8,23 +8,6 @@ import { EarthquakeMessage } from '../interfaces/earthquake';
 })
 export class EarthquakeSocketService {
 
-  private createConnection(): WebSocketSubject<EarthquakeMessage> {
-
-    return webSocket<EarthquakeMessage>({
-      url: 'ws://localhost:8000/ws/earthquakes',
-
-      deserializer: event => JSON.parse(event.data),
-
-      openObserver: {
-        next: () => console.log('WebSocket conectado')
-      },
-
-      closeObserver: {
-        next: () => console.log('WebSocket desconectado')
-      }
-    });
-  }
-
   connect(url: string): Observable<EarthquakeMessage> {
 
     return defer(() =>

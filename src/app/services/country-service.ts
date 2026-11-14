@@ -10,6 +10,5 @@ export class CountryService {
   private apiUrl = 'http://localhost:8000/api/countries';
 
   countries=httpResource<Country[]>(()=>{
-    console.log('HTTP RESOURCE LLAMADO')
     return this.apiUrl},{defaultValue:[]});
 }

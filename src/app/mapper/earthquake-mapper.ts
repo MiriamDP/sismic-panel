@@ -3,7 +3,6 @@ import { Earthquake, EarthquakeResponse } from "../interfaces/earthquake";
 export class EarthquakeMappers{
 
     static mapEarthquake(data: EarthquakeResponse): Earthquake {
-        // console.log('Response mapper: ',data)
         return {
             id: data.event_id,
             magnitude: data.magnitude,

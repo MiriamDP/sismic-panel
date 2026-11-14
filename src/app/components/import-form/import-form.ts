@@ -35,7 +35,6 @@ export class ImportForm {
     const formValue = this.form.getRawValue();
     this.formValue.emit(formValue)
 
-    console.log(formValue);
 
   }
 }

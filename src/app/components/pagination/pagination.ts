@@ -24,10 +24,12 @@ export class Pagination {
   });
 
   prevPage(){
+
     this.pageChange.emit(this.currentPage()-1);
   }
   
   nextPage(){
+
     this.pageChange.emit(this.currentPage()+1);
   }
   
@@ -36,6 +38,7 @@ export class Pagination {
   }
 
   firstPage(page:number){
+
     this.pageChange.emit(1);
   }
 }

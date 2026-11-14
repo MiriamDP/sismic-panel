@@ -43,8 +43,6 @@ export class ImportPage {
 
       next: response => {
 
-        console.log('Importación iniciada:', response);
-
         // Actualizar estado de la última importación
         this.importStatus?.refresh();
 
