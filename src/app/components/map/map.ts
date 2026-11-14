@@ -423,8 +423,14 @@ export class MapComponent {
 
     this.countEmit.emit(validEarthquakes.length);
 
+    const totalOmitted = invalidCoordinates + olderNewEvents;
+
+    this.earthquakeStore.omittedSession.update(
+      current => Math.max(current, totalOmitted)
+    );
+
     this.omittedCount.emit(
-      invalidCoordinates + olderNewEvents
+      this.earthquakeStore.omittedSession()
     );
 
     const latestEarthquake = sortedEarthquakes[0];
@@ -554,7 +560,6 @@ export class MapComponent {
     }
 
     this.count.set(this.earthquakeMarkers.size);
-    this.omitted.set(invalidCoordinates);
 
     this.lastRead.set(new Date());
 

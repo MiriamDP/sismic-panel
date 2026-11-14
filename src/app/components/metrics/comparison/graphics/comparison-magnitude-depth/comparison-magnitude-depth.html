@@ -1,0 +1,22 @@
+
+<div class="card bg-base-100 shadow-md">
+
+  <div class="card-body">
+
+    <h2 class="card-title text-lg">
+      <i class="fa-solid fa-braille text-primary"></i>
+      Magnitud y profundidad comparadas
+    </h2>
+
+    <p class="text-sm opacity-60">
+      Distribución de magnitudes y profundidades de los terremotos
+      registrados en {{ firstYear() }} y {{ secondYear() }}.
+    </p>
+
+    <app-base-chart
+      [config]="chartConfig()">
+    </app-base-chart>
+
+  </div>
+
+</div>

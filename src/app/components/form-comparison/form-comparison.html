@@ -1,0 +1,243 @@
+<form [formGroup]="comparisonForm"
+      (ngSubmit)="onSubmit()"
+      class="card bg-base-100 shadow-sm border border-base-300">
+
+  <div class="card-body gap-5">
+
+    <h2 class="card-title text-lg">
+      Comparar periodos
+    </h2>
+
+    <!-- Intervalo común -->
+    <div class="space-y-3">
+
+      <h3 class="font-semibold text-sm">
+        Intervalo de fechas
+      </h3>
+
+      <div class="grid grid-cols-2 gap-3">
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Día inicial</span>
+          </label>
+
+          <input type="number"
+                 formControlName="startDay"
+                 min="1"
+                 max="31"
+                 class="input input-bordered w-full" />
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Mes inicial</span>
+          </label>
+
+          <select formControlName="startMonth"
+                  class="select select-bordered w-full">
+
+            @for (month of months; track month.value) {
+              <option [value]="month.value">
+                {{ month.label }}
+              </option>
+            }
+
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Día final</span>
+          </label>
+
+          <input type="number"
+                 formControlName="endDay"
+                 min="1"
+                 max="31"
+                 class="input input-bordered w-full" />
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Mes final</span>
+          </label>
+
+          <select formControlName="endMonth"
+                  class="select select-bordered w-full">
+
+            @for (month of months; track month.value) {
+              <option [value]="month.value">
+                {{ month.label }}
+              </option>
+            }
+
+          </select>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="divider my-0"></div>
+
+    <!-- Años -->
+    <div class="space-y-3">
+
+      <h3 class="font-semibold text-sm">
+        Años a comparar
+      </h3>
+
+      <div class="grid grid-cols-2 gap-3">
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Primer año</span>
+          </label>
+
+          <input type="number"
+                 formControlName="firstYear"
+                 class="input input-bordered w-full" />
+        </div>
+
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Segundo año</span>
+          </label>
+
+          <input type="number"
+                 formControlName="secondYear"
+                 class="input input-bordered w-full" />
+
+          @if (comparisonForm.controls.secondYear.hasError('sameYear')) {
+            <span class="text-error text-xs mt-1">
+              Los años deben ser diferentes.
+            </span>
+          }
+
+          @if (comparisonForm.hasError('invalidLeapDate')) {
+            <p class="text-error text-sm">
+              El intervalo contiene una fecha que no existe en alguno de los años seleccionados.
+              Comprueba especialmente el 29 de febrero.
+            </p>
+          }
+
+          @if (comparisonForm.hasError('invalidDateRange')) {
+            <p class="text-error text-sm">
+              La fecha inicial debe ser anterior o igual a la fecha final.
+            </p>
+          }
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="divider my-0"></div>
+
+    <!-- Filtros adicionales -->
+    <div class="space-y-3">
+
+      <h3 class="font-semibold text-sm">
+        Filtros adicionales
+      </h3>
+
+<div class="form-control w-full">
+
+  <label class="label">
+    <span class="label-text">País</span>
+  </label>
+
+  <select formControlName="countryCode"
+          class="select select-bordered w-full">
+
+    <option value="">
+      Todos los países
+    </option>
+
+    @if (countries.isLoading()) {
+      <option disabled>
+        Cargando países...
+      </option>
+    }
+
+    @if (countries.error()) {
+      <option disabled>
+        No se pudieron cargar los países
+      </option>
+    }
+
+    @if (countries.hasValue()) {
+      @for (country of countries.value(); track country.adm0_a3) {
+        <option [value]="country.adm0_a3">
+          {{ country.name_es }}
+        </option>
+      }
+    }
+
+  </select>
+
+</div>
+
+      <div>
+        <label class="label">
+          <span class="label-text font-medium">Magnitud</span>
+        </label>
+
+        <div class="grid grid-cols-2 gap-2">
+
+          <input type="number"
+                 formControlName="minMagnitude"
+                 placeholder="Mínima"
+                 class="input input-bordered w-full" />
+
+          <input type="number"
+                 formControlName="maxMagnitude"
+                 placeholder="Máxima"
+                 class="input input-bordered w-full" />
+
+        </div>
+      </div>
+
+      <div>
+        <label class="label">
+          <span class="label-text font-medium">Profundidad (km)</span>
+        </label>
+
+        <div class="grid grid-cols-2 gap-2">
+
+          <input type="number"
+                 formControlName="minDepth"
+                 placeholder="Mínima"
+                 class="input input-bordered w-full" />
+
+          <input type="number"
+                 formControlName="maxDepth"
+                 placeholder="Máxima"
+                 class="input input-bordered w-full" />
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card-actions flex-col">
+
+      <button type="submit"
+              class="btn btn-primary w-full">
+        Comparar periodos
+      </button>
+
+      <button type="button"
+              (click)="reset()"
+              class="btn btn-ghost w-full">
+        Restablecer filtros
+      </button>
+
+    </div>
+
+  </div>
+
+</form>
+

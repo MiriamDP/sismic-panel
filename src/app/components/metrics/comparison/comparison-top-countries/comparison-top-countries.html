@@ -1,0 +1,100 @@
+
+<div class="card bg-base-100 shadow-md">
+
+  <div class="card-body">
+
+    <h2 class="card-title text-lg">
+      <i class="fa-solid fa-earth-europe text-primary"></i>
+      Comparativa por países
+    </h2>
+
+    <p class="text-sm opacity-60">
+      Actividad sísmica por país durante {{ firstYear() }}
+      y {{ secondYear() }}.
+    </p>
+
+    <div class="overflow-x-auto">
+
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>País</th>
+            <th class="text-right">{{ firstYear() }}</th>
+            <th class="text-right">{{ secondYear() }}</th>
+            <th class="text-right">Diferencia</th>
+            <th class="text-right">Variación</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (country of countries(); track country.country_code ?? country.country_name) {
+
+            <tr>
+
+              <td class="font-medium">
+                {{ country.country_name }}
+              </td>
+
+              <td class="text-right">
+                {{ country.firstTotal | number }}
+              </td>
+
+              <td class="text-right">
+                {{ country.secondTotal | number }}
+              </td>
+
+              <td class="text-right font-semibold"
+                  [class.text-success]="country.difference < 0"
+                  [class.text-error]="country.difference > 0">
+
+                {{ country.difference > 0 ? '+' : '' }}
+                {{ country.difference | number }}
+
+              </td>
+
+              <td class="text-right">
+
+                @if (country.percentage !== null) {
+
+                  <span
+                    [class.text-success]="country.percentage < 0"
+                    [class.text-error]="country.percentage > 0">
+
+                    {{ country.percentage > 0 ? '+' : '' }}
+                    {{ country.percentage | number:'1.1-2' }} %
+
+                  </span>
+
+                } @else {
+
+                  <span class="text-base-content/50">
+                    —
+                  </span>
+
+                }
+
+              </td>
+
+            </tr>
+
+          } @empty {
+
+            <tr>
+              <td colspan="5" class="text-center py-8">
+                No hay datos disponibles.
+              </td>
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

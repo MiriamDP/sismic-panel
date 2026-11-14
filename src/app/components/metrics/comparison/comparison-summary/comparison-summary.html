@@ -1,0 +1,85 @@
+
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+
+  @for (metric of metrics(); track metric.title) {
+
+    <div class="card bg-base-100 shadow-md">
+
+      <div class="card-body p-4 gap-3">
+
+        <div class="flex items-center justify-between">
+
+          <h3 class="text-sm font-medium text-base-content/70">
+            {{ metric.title }}
+          </h3>
+
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+
+          <div>
+            <span class="text-xs text-base-content/50">
+              {{ firstYear() }}
+            </span>
+
+            <p class="text-xl font-bold">
+              {{ metric.firstValue === null ? '—' : (metric.firstValue | number:'1.2-2') }}
+            </p>
+          </div>
+
+          <div>
+            <span class="text-xs text-base-content/50">
+              {{ secondYear() }}
+            </span>
+
+            <p class="text-xl font-bold">
+              {{ metric.secondValue === null ? '—' : (metric.secondValue | number:'1.2-2') }}
+            </p>
+          </div>
+
+        </div>
+
+        <div class="divider my-0"></div>
+
+        @if (getDifference(metric.firstValue, metric.secondValue); as difference) {
+
+          <div class="flex justify-between items-center text-sm">
+
+            <span class="text-base-content/60">
+              Diferencia
+            </span>
+
+            <span [class.text-success]="difference < 0"
+                  [class.text-error]="difference > 0"
+                  class="font-semibold">
+
+              {{ difference > 0 ? '+' : '' }}{{ difference | number:'1.2-2' }}
+
+            </span>
+
+          </div>
+
+        } @else {
+
+          <div class="text-xs text-base-content/50">
+            Diferencia no disponible
+          </div>
+
+        }
+
+        @if (getPercentage(metric.firstValue, metric.secondValue); as percentage) {
+
+          <div class="text-xs text-base-content/60">
+            Variación:
+            {{ percentage > 0 ? '+' : '' }}{{ percentage | number:'1.1-2' }} %
+          </div>
+
+        }
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

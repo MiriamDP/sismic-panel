@@ -8,6 +8,7 @@ export class EarthquakeStoreService {
     private earthquakesMap = new Map<string, Earthquake>();
     readonly earthquakes = signal<Earthquake[]>([]);
     readonly count = signal(0);
+    readonly omittedSession = signal(0);
 
     /**   * Recibe nuevos terremotos y actualiza   * los existentes sin duplicarlos.   */
     addOrUpdate(earthquakes: Earthquake[]): void {

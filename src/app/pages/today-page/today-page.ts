@@ -1,9 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MapComponent } from '../../components/map/map';
 import { Stat } from '../../components/stat/stat';
 import { STAT_ICONS } from '../../utils/stats-icons';
 import { Earthquake } from '../../interfaces/earthquake';
 import { SessionList } from '../../components/session-list/session-list';
+import { EarthquakeStoreService } from '../../services/earthquake-store-service';
 
 @Component({
   selector: 'app-today-page',
@@ -18,5 +19,8 @@ export class TodayPage {
   hour=signal ('Sin hora')
   total=signal(0);
   earthquake=signal<null|Earthquake>(null)
-  omitted =signal(0);
+
+  private earthquakeStore = inject(EarthquakeStoreService);
+
+  omitted = this.earthquakeStore.omittedSession;
 }

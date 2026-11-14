@@ -1,0 +1,22 @@
+
+<div class="card bg-base-100 shadow-md">
+
+  <div class="card-body">
+
+    <h2 class="card-title text-lg">
+      <i class="fa-solid fa-chart-column text-primary"></i>
+      Comparación de terremotos {{ granularityLabel() }}
+    </h2>
+
+    <p class="text-sm opacity-60">
+      Distribución temporal de terremotos entre
+      {{ firstYear() }} y {{ secondYear() }}.
+    </p>
+
+    <app-base-chart
+      [config]="chartConfig()">
+    </app-base-chart>
+
+  </div>
+
+</div>

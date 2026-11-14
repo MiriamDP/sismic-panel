@@ -1,2 +1,117 @@
-<p>comparation-page works!</p>
-<p>Esta pagina sera similar a la de metricas pero comparando dos periodos</p>
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+  <!-- Filtros -->
+  <aside class="lg:col-span-1">
+
+    <app-form-comparison (form)="onFiltersChange($event)" [filters]="filterForm()">
+    </app-form-comparison>
+
+  </aside>
+
+  <!-- Resultados -->
+  <main class="lg:col-span-3 min-w-0 space-y-6">
+
+    <!-- Cabecera -->
+    <div class="flex flex-wrap justify-between items-center gap-3">
+
+      <div>
+        <h1 class="text-2xl font-bold">Comparativa de periodos</h1>
+        <p class="text-sm text-base-content/60">Comparación de actividad sísmica entre dos años.</p>
+      </div>
+
+      <div class="flex items-center gap-2">
+
+        <span class="badge badge-primary badge-lg">
+          {{ filterForm().firstYear }}
+        </span>
+
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+
+        <span class="badge badge-success badge-lg">
+          {{ filterForm().secondYear }}
+        </span>
+
+      </div>
+
+    </div>
+
+    @if (!hasSearched()) {
+
+    <div class="text-center py-12">
+      <h3 class="text-lg font-semibold">
+        Compara periodos sísmicos
+      </h3>
+
+      <p class="text-sm text-base-content/60 mt-2">
+        Selecciona los años, el intervalo de fechas
+        y los filtros que quieras aplicar.
+        Después pulsa Comparar periodos para consultar los resultados.
+
+        <cite>Importante: Comprobar que existen datos importados para los dos periodos a comparar, 
+          en caso contrario los resultados obtenidos pueden no coincidir. 
+          Puedes comprobar los periodos importados en <a class="link link-info" [routerLink]="['/imports']">Importaciones</a>
+        </cite>
+      </p>
+    </div>
+
+    } @else {
+
+      @if (comparison.isLoading()) {
+
+      <div class="text-center py-10">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p>Comparando periodos...</p>
+      </div>
+
+      } @else if (comparison.error()) {
+
+      <div class="alert alert-error">
+        No se pudieron obtener los datos de comparación.
+      </div>
+
+      } @else if (comparison.hasValue()) {
+
+      @if (comparison.value(); as data) {
+
+      <!-- Resumen -->
+      <app-comparison-summary [firstYear]="data.first_year" [secondYear]="data.second_year"
+        [firstData]="data.first_period.summary" [secondData]="data.second_period.summary" [averageLabel]="averageLabel">
+      </app-comparison-summary>
+
+      <!-- Terremoto máximo -->
+      <app-comparison-max-earthquake [firstYear]="data.first_year" [secondYear]="data.second_year"
+        [firstEarthquake]="data.first_period.summary.max_earthquake"
+        [secondEarthquake]="data.second_period.summary.max_earthquake">
+      </app-comparison-max-earthquake>
+
+      <!-- Distribución temporal -->
+      <app-comparison-time-distribution [firstYear]="data.first_year" [secondYear]="data.second_year"
+        [firstData]="data.first_period.time_distribution" [secondData]="data.second_period.time_distribution">
+      </app-comparison-time-distribution>
+
+      <!-- Gráficos secundarios -->
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+        <app-comparison-magnitude-depth [firstYear]="data.first_year" [secondYear]="data.second_year"
+          [firstData]="data.first_period.magnitude_depth" [secondData]="data.second_period.magnitude_depth">
+        </app-comparison-magnitude-depth>
+
+        <app-comparison-earthquake-evolution [firstYear]="data.first_year" [secondYear]="data.second_year"
+          [firstData]="data.first_period.time_distribution" [secondData]="data.second_period.time_distribution">
+        </app-comparison-earthquake-evolution>
+
+      </div>
+
+      <!-- Países -->
+      <app-comparison-top-countries [firstYear]="data.first_year" [secondYear]="data.second_year"
+        [firstCountries]="data.first_period.top_countries" [secondCountries]="data.second_period.top_countries">
+      </app-comparison-top-countries>
+
+      }
+      }
+    }
+
+
+  </main>
+
+</div>
