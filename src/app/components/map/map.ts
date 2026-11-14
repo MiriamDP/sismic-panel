@@ -2,12 +2,10 @@ import { Component, signal, DestroyRef, inject, effect, output } from '@angular/
 import { LeafletDirective } from '@bluehalo/ngx-leaflet';
 import * as L from 'leaflet';
 import type { FeatureCollection, Point } from 'geojson';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Earthquake } from '../../interfaces/earthquake';
 import { EarthquakeSocketService } from '../../services/earthquake-socket-service';
-import { EarthquakeMappers } from '../../mapper/earthquake-mapper';
 import { EarthquakeStoreService } from '../../services/earthquake-store-service';
-import { environment } from '../../../environments/environment';
+import { ConfigService } from '../../services/config-service';
 
 type Properties = { mag: number | null; place: string; time: number; updated: number; country_name?: string | null };
 type Events = FeatureCollection<Point, Properties> & { metadata?: { generated?: number; mode?: string } };
@@ -73,6 +71,7 @@ export class MapComponent {
   countEmit = output<number>();
   totalEarthquakesEmit = output<number>();
   omittedCount = output<number>();
+  private configSvc=inject(ConfigService);
 
   readonly omitted = signal(0);
   readonly countriesStatus = signal('Cargando catálogo');
@@ -86,7 +85,7 @@ export class MapComponent {
   private earthquakeWebsocket = inject(EarthquakeSocketService);
   private earthquakeMarkers = new Map<string, L.CircleMarker>();
   private earthquakeData = new Map<string, Earthquake>();
-  private readonly MAX_EARTHQUAKES = environment.MAX_EARTHQUAKES;
+  private readonly MAX_EARTHQUAKES = this.configSvc.settings.max_earthquakes;
   private animationTimers = new Set<ReturnType<typeof setTimeout>>();
   private pulseMarkers = new Set<L.Marker>();
   private earthquakeStore = inject(EarthquakeStoreService)

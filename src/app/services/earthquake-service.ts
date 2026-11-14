@@ -1,16 +1,16 @@
 import { HttpClient, HttpParams, httpResource } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { map, Observable, of, tap } from 'rxjs';
-import { Earthquake, EarthquakeComparisonFilters, EarthquakeComparisonMetrics, EarthquakeComparisonMetricsResponse, EarthquakeFilters, EarthquakeMetrics, EarthquakeMetricsResponse, EarthquakeResponse, Earthquakes, EarthquakesResponse } from '../interfaces/earthquake';
+import { EarthquakeComparisonFilters, EarthquakeComparisonMetrics, EarthquakeComparisonMetricsResponse, EarthquakeFilters, EarthquakeMetrics, EarthquakeMetricsResponse, EarthquakeResponse, Earthquakes, EarthquakesResponse } from '../interfaces/earthquake';
 import { EarthquakeMappers } from '../mapper/earthquake-mapper';
 import { ImportJob } from '../interfaces/import-job';
-import { environment } from '../../environments/environment';
+import { ConfigService } from './config-service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class EarthquakeService {
-  private apiUrl = 'http://localhost:8000/api/earthquakes'
+  private configSvc=inject(ConfigService);
   private http = inject(HttpClient)
   private metricsCache = new Map<string, EarthquakeMetrics>();
   lastMetricsFilters = signal<Partial<EarthquakeFilters> | null>(null);
@@ -50,7 +50,7 @@ export class EarthquakeService {
       params = params.set('max_depth', filters.maxDepth);
     }
     return this.http.get<EarthquakesResponse>(
-      `${this.apiUrl}`,
+      `${this.configSvc.settings.apiUrl}/api/earthquakes`,
       { params }
     ).pipe(
       map(response => ({ ...response, items: EarthquakeMappers.mapEarthquakes(response.items) }))
@@ -60,7 +60,7 @@ export class EarthquakeService {
   // Consultar estado de importación histórica
   getEarthquake(id: string) {
     return httpResource(
-      () => `${this.apiUrl}/${id}`,
+      () => `${this.configSvc.settings.apiUrl}/api/earthquakes/${id}`,
       {
         parse: (response) =>
           EarthquakeMappers.mapEarthquake(response as EarthquakeResponse)
@@ -76,7 +76,7 @@ export class EarthquakeService {
   ): Observable<any> {
 
     return this.http.post(
-      `${this.apiUrl}/import-history`,
+      `${this.configSvc.settings.apiUrl}/api/earthquakes/import-history`,
       {
         start_date: startDate,
         end_date: endDate,
@@ -88,18 +88,18 @@ export class EarthquakeService {
   getImports(): Observable<ImportJob[]> {
 
     return this.http.get<ImportJob[]>(
-      `${this.apiUrl}/import-history/jobs`
+      `${this.configSvc.settings.apiUrl}/api/earthquakes/import-history/jobs`
     );
   }
 
   getImportStatus() {
     return this.http.get<any>(
-      `${this.apiUrl}/import-history/status`
+      `${this.configSvc.settings.apiUrl}/api/earthquakes/import-history/status`
     );
   }
 
-  getLatest(limit: number = environment.MAX_EARTHQUAKES) {
-    return this.http.get<EarthquakeResponse[]>(`${this.apiUrl}/latest?limit=${limit}`).pipe(
+  getLatest(limit: number = this.configSvc.settings.max_earthquakes) {
+    return this.http.get<EarthquakeResponse[]>(`${this.configSvc.settings.apiUrl}/api/earthquakes/latest?limit=${limit}`).pipe(
       map(response => EarthquakeMappers.mapEarthquakes(response))
     )
   }
@@ -155,7 +155,7 @@ export class EarthquakeService {
 
 
     return this.http.get<EarthquakeMetricsResponse>(
-      `${this.apiUrl}/metrics`,
+      `${this.configSvc.settings.apiUrl}/api/earthquakes/metrics`,
       { params }
     ).pipe(
 
@@ -268,7 +268,7 @@ export class EarthquakeService {
     });
 
     return this.http.get<EarthquakeComparisonMetricsResponse>(
-      `${this.apiUrl}/metrics/comparison`,
+      `${this.configSvc.settings.apiUrl}/api/earthquakes/metrics/comparison`,
       { params }
     ).pipe(
 

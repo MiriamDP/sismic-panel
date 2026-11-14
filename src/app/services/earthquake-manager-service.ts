@@ -5,7 +5,7 @@ import { EarthquakeSocketService } from './earthquake-socket-service';
 import { EarthquakeStoreService } from './earthquake-store-service';
 import { EarthquakeService } from './earthquake-service';
 import { map, of, switchMap, tap } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { ConfigService } from './config-service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +15,7 @@ export class EarthquakeManagerService {
   private socket = inject(EarthquakeSocketService);
   private store = inject(EarthquakeStoreService);
   private destroyRef = inject(DestroyRef);
+  private configSvc = inject(ConfigService);
   readonly connected = signal(false);
 
   connect(apiUrl: string): void {
@@ -55,7 +56,7 @@ export class EarthquakeManagerService {
   }
 
   private loadLatest() {
-    return this.rest.getLatest(environment.MAX_EARTHQUAKES).pipe(
+    return this.rest.getLatest(this.configSvc.settings.max_earthquakes).pipe(
       tap(earthquakes => {
         this.store.addOrUpdate(earthquakes);
       }),

@@ -1,13 +1,15 @@
 import { httpResource } from '@angular/common/http';
-import { effect, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Country } from '../interfaces/country';
+import { ConfigService } from './config-service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CountryService {
 
-  private apiUrl = 'http://localhost:8000/api/countries';
+  private configSvc = inject(ConfigService);
+  private apiUrl = this.configSvc.settings.apiUrl+'/api/countries';
 
   countries=httpResource<Country[]>(()=>{
     return this.apiUrl},{defaultValue:[]});

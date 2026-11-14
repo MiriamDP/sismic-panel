@@ -1,6 +1,7 @@
 {
   "mode": "api",
-  "apiUrl": "http://localhost:8000",
+  "max_earthquakes": 10,
+  "apiUrl": "https://antirust-wackiness-doorpost.ngrok-free.dev",
   "refreshMs": 60000,
   "skipNgrokWarning": false
 }
