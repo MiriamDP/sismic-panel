@@ -6,6 +6,7 @@ Panel web para explorar y visualizar terremotos recientes e históricos. La apli
 
 - **Aplicación desplegada:** [earth-watcher-mdp.netlify.app](https://earth-watcher-mdp.netlify.app/)
 - **Repositorio del backend:** [MiriamDP/sismic-observer](https://github.com/MiriamDP/sismic-observer)
+- **Video explicativo app:** [Sismic Observer](https://youtu.be/KzEtNKzLNXs)
 
 ## Funcionalidades
 
